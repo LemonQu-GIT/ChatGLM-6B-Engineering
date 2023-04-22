@@ -1,4 +1,4 @@
-import requests, re, json, io, base64
+import requests, re, json, io, base64, os
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from PIL import Image, PngImagePlugin
@@ -157,7 +157,11 @@ def search_csdn(url):
 	return item_title
 
 def search_github(keyword,opt):
-	headers={"Authorization":"token "+"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"}
+	token = os.getenv('git_token')
+	if not token == None:
+		headers={"Authorization":"token "+ str(token)}
+	else:
+		headers={}
 	new_key = ""
 	for ch in keyword:
 		if not u'\u4e00' <= ch <= u'\u9fff':
