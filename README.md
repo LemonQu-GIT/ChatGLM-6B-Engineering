@@ -1,4 +1,4 @@
-# ChatGLM-6B
+# ChatGLM-6B-Engineering
 
 <p align="center">
    🌐 <a href="https://chatglm.cn/blog" target="_blank">Blog</a> • 🤗 <a href="https://huggingface.co/THUDM/chatglm-6b" target="_blank">HF Repo</a> • 🐦 <a href="https://twitter.com/thukeg" target="_blank">Twitter</a> • 📃 <a href="https://arxiv.org/abs/2103.10360" target="_blank">[GLM@ACL 22]</a> <a href="https://github.com/THUDM/GLM" target="_blank">[GitHub]</a> • 📃 <a href="https://arxiv.org/abs/2210.02414" target="_blank">[GLM-130B@ICLR 23]</a> <a href="https://github.com/THUDM/GLM-130B" target="_blank">[GitHub]</a> <br>
@@ -10,25 +10,24 @@
 ## 介绍
 
 ChatGLM-6B 是一个开源的、支持中英双语的对话语言模型，基于 [General Language Model (GLM)](https://github.com/THUDM/GLM) 架构，具有 62 亿参数。结合模型量化技术，用户可以在消费级的显卡上进行本地部署（INT4 量化级别下最低只需 6GB 显存）。
-ChatGLM-6B 使用了和 ChatGPT 相似的技术，针对中文问答和对话进行了优化。经过约 1T 标识符的中英双语训练，辅以监督微调、反馈自助、人类反馈强化学习等技术的加持，62 亿参数的 ChatGLM-6B 已经能生成相当符合人类偏好的回答，更多信息请参考我们的[博客](https://chatglm.cn/blog)。
 
-本项目基于 ChatGLM-6B 进行了后期调教，支持网上搜索及生成图片
+本项目基于 ChatGLM-6B 进行了后期调教，支持网上搜索及生成图片。
 
-生成图片则需要本地部署 [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui) 并加载 API
+生成图片则需要本地部署 [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui) 并加载 API：
 
 ```powershell
 python webui.py --xformers --nowebui
 ```
 
-运行程序需要先运行 api.py
+运行程序需要先运行 api.py，
 
-再运行
+再运行：
 
 ```powershell
 streamlit run streamlit_new.py
 ```
 
-在 http://localhost:8501/ 中查看
+加载完成后在 http://localhost:8501/ 中查看。
 
 ## 协议
 
