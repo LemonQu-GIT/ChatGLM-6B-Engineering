@@ -77,8 +77,9 @@ if mode == "Stable Diffusion":
             if draw_object[0] == "，" or draw_object[0] == "," or draw_object[0] == "。" or draw_object[0] == ".":
                 draw_object = draw_object[1:len(draw_object)]
             if draw_object[-1] == "，" or draw_object[-1] == "," or draw_object[-1] == "。" or draw_object[-1] == ".":
-                draw_object = draw_object[0:len(draw_object)-1]
-            stable_diffusion(str(translate(draw_object)),"")
+                draw_object = draw_object[0:len(draw_object)-1]           
+            Nprompt = "sketches, (worst quality:2), (low quality:2), (normal quality:2), lowers, ((monochrome)), ((grayscale)), skin spots, acnes, skin blemishes, bad anatomy, DeepNegative, (fat:1.2), tilted head, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, jpeg artifacts, signature, watermark, username, blurry, bad feet, poorly drawn hands, poorly drawn face, mutation, deformed, signature, watermark"
+            stable_diffusion(str(translate(draw_object)),Nprompt)
             st.markdown("### User: ")
             st.markdown(prompt_text)
             st.markdown('### ChatGLM-6B: ')
