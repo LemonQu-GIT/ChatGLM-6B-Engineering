@@ -2,6 +2,7 @@ import requests, re, json, io, base64, os
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from PIL import Image, PngImagePlugin
+import streamlit as st
 
 def ext_zhihu(url):
 	if "/answer" in url:
@@ -276,3 +277,22 @@ def stable_diffusion(Pprompt,Nprompt):
         pnginfo.add_text("parameters", response2.json().get("info"))
         image.save('stable_diffusion.png', pnginfo=pnginfo)
 
+def write_result(prompt, response):
+	st.markdown("### User: ")
+	st.markdown(prompt)
+	st.markdown('### ChatGLM-6B: ')
+	st.markdown(response)
+
+global context
+context = []
+def update_context(prompt, response):
+	global context
+	context.append([prompt, response])
+	
+def get_context():
+	global context
+	return context
+
+def clear_context():
+	global context
+	context = []

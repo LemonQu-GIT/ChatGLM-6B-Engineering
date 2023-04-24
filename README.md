@@ -8,6 +8,8 @@ https://www.bilibili.com/video/BV1gX4y1B7PV
 
 ChatGLM-6B 是一个开源的、支持中英双语的对话语言模型，基于 [General Language Model (GLM)](https://github.com/THUDM/GLM) 架构，具有 62 亿参数。结合模型量化技术，用户可以在消费级的显卡上进行本地部署
 
+![img](demo.png "示例图片")
+
 本项目基于 ChatGLM-6B 进行了后期调教，支持网上搜索及生成图片
 
 生成图片则需要本地部署 [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui) 并加载 API：

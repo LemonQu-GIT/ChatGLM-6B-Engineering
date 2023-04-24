@@ -3,6 +3,5 @@ __pycache__/
 .vscode/
 *.py[cod]
 *$py.class
-stream_api.py
 stable_diffusion.png
 test.py
