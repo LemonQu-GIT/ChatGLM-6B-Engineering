@@ -157,7 +157,7 @@ def search_csdn(url):
 	item_title = re.sub(r'(<[^>]+>|\s)','',str(item_list))
 	return item_title
 
-def search_github(keyword,opt):
+def search_github(keyword):
 	token = os.getenv('git_token')
 	if not token == None:
 		headers={"Authorization":"token "+ str(token)}
@@ -167,27 +167,26 @@ def search_github(keyword,opt):
 	for ch in keyword:
 		if not u'\u4e00' <= ch <= u'\u9fff':
 			new_key += ch
-	url = quote("https://api.github.com/search/repositories?q="+str(new_key)+"&sort=stars&order=desc",safe='/:?=.&')
+	url = quote("https://api.github.com/search/repositories?q="+str(new_key)+"&order=desc",safe='/:?=.&')
 	r = requests.get(url, headers=headers)
 	resp_json = json.loads(r.text)
 	items = resp_json.get('items')
-	relist = []
-	items = items[0:int(opt)]
-	for repos in items:
-		item_json = json.dumps(repos)
-		item_json = json.loads(str(item_json))
-		addr = item_json.get('full_name')
-		url = quote("https://api.github.com/repos/"+str(addr)+"/readme",safe='/:?=.&')
-		r = requests.get(url, headers=headers)
-		repo_json = json.loads(r.text)
-		readme = repo_json.get('download_url')
-		r = requests.get(str(readme).replace("https://raw.githubusercontent.com/","https://raw.fastgit.org/"), headers=headers)
-		relist.append(repr(r.text))
+	items = items[0:1]
+	item_json = json.dumps(items[0])
+	item_json = json.loads(str(item_json))
+	addr = item_json.get('full_name')
+	url = quote("https://api.github.com/repos/"+str(addr)+"/readme",safe='/:?=.&')
+	r = requests.get(url, headers=headers)
+	repo_json = json.loads(r.text)
+	readme = repo_json.get('download_url')
+	r = requests.get(str(readme).replace("https://raw.githubusercontent.com/","https://raw.fastgit.org/"), headers=headers)
+	relist = [addr,r.text]
 	return relist
 
 def search_main(item, feature):
 	web_list = search_web(item)
 	return_list = []
+	flist = []
 	print(feature)
 	#print(web_list)
 	if '百科' in feature:
@@ -195,27 +194,37 @@ def search_main(item, feature):
 		if not ans == "":
 			return_list.append(ans)
 	if 'GitHub' in feature:
-		ans = str(search_github(item,1))
+		githubresp = search_github(item)
+		ans = githubresp[1]
 		if not ans == "":
 			return_list.append(ans)
+			flist.append("https://github.com/"+githubresp[0])
 	for items in web_list:
 		if "zhihu.com/question/" in items[1] and '知乎回复' in feature:
 			return_list.append(str(search_zhihu_que(ext_zhihu(items[1]))))
+			flist.append(items[1])
 		if "baike.sogou.com" in items[1] and '百科' in feature:
 			return_list.append(str(search_baike(items[1])))
+			flist.append(items[1])
 		if "mp.weixin.qq.com" in items[1] and '微信公众号' in feature:
 			return_list.append(str(search_wx(items[1])))
+			flist.append(items[1])
 		if "zhuanlan.zhihu.com" in items[1] and '知乎专栏' in feature:
 			return_list.append(str(search_zhihu_zhuanlan(items[1])))
+			flist.append(items[1])
 		if "163.com/dy/article/" in items[1] and '新闻' in feature:
 			return_list.append(str(search_news_163(items[1])))
+			flist.append(items[1])
 		if "sohu.com/a/" in items[1] and '新闻' in feature:
 			return_list.append(str(search_news_sohu(items[1])))
+			flist.append(items[1])
 		if "bilibili.com/read/" in items[1] and 'B站专栏' in feature:
 			return_list.append(str(search_bilibili(items[1])))	
+			flist.append(items[1])
 		if "blog.csdn.net" in items[1] and 'CSDN' in feature:
 			return_list.append(str(search_csdn(items[1])))
-	return return_list
+			flist.append(items[1])
+	return [flist,return_list]
 
 def test_if_zhcn(string):
     for ch in string:
@@ -258,11 +267,11 @@ def chatglm_json(prompt, history, max_length, top_p, temperature):
     json_resp_raw_list = json.dumps(json_resp_raw)
     return json_resp_raw_list
 
-def stable_diffusion(Pprompt,Nprompt):
+def stable_diffusion(Pprompt,Nprompt, steps):
     url = "http://127.0.0.1:7861"
     payload = {
         "prompt": Pprompt,
-        "steps": 5,
+        "steps": steps,
         "negative_prompt": Nprompt
     }
     response = requests.post(url=f'{url}/sdapi/v1/txt2img', json=payload)

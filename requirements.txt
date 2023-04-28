@@ -9,3 +9,4 @@ accelerate
 bs4
 fastapi
 streamlit
+clip-interrogator

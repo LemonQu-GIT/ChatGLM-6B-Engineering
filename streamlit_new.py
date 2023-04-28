@@ -1,7 +1,9 @@
 import streamlit as st
-import json, time
+import numpy as np
+import json, time, cv2
 from PIL import Image
 from streamlit_utils import *
+from clip_utils import * # WARNING: DO NOT RUN ON SAVE OR WILL CAUSE RESOURCE LEAK
 
 st.set_page_config(
     page_title="ChatGLM-6B streamlit",
@@ -12,7 +14,7 @@ st.sidebar.expander('')
 st.sidebar.subheader('Parameters')
 prompt = st.sidebar.text_area('Prompt', help = "Text send  to ChatGLM-6B")
 send = st.sidebar.button("Send", key = "send_prompt", help = "Send text to ChatGLM-6B")
-mode = st.sidebar.radio("Feature",('Default', 'Stable Diffusion', 'Web'))
+mode = st.sidebar.radio("Feature",('Default', 'Stable Diffusion', 'Web', 'CLIP'))
 adv_mode = st.sidebar.checkbox('Advanced Settings')
 if adv_mode:
     max_length = st.sidebar.slider("Max Length", min_value = 1024, max_value = 8192, value = 2048, step = 1024, help = "Prompt Max Length")
@@ -57,7 +59,11 @@ if mode == "Default":
             update_context(prompt_text, response)
 
 if mode == "Stable Diffusion":
-    if send:    
+    if adv_mode:
+        enhance = st.sidebar.checkbox('Enhanced prompt')
+    else:
+        enhance = False 
+    if send:
         if not prompt == "":
             send_begin = time.perf_counter()
             prompt_text = prompt
@@ -77,14 +83,20 @@ if mode == "Stable Diffusion":
             if draw_object[0] == "，" or draw_object[0] == "," or draw_object[0] == "。" or draw_object[0] == ".":
                 draw_object = draw_object[1:len(draw_object)]
             if draw_object[-1] == "，" or draw_object[-1] == "," or draw_object[-1] == "。" or draw_object[-1] == ".":
-                draw_object = draw_object[0:len(draw_object)-1]           
-            Nprompt = "sketches, (worst quality:2), (low quality:2), (normal quality:2), lowers, ((monochrome)), ((grayscale)), skin spots, acnes, skin blemishes, bad anatomy, DeepNegative, (fat:1.2), tilted head, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, jpeg artifacts, signature, watermark, username, blurry, bad feet, poorly drawn hands, poorly drawn face, mutation, deformed, signature, watermark"
-            stable_diffusion(str(translate(draw_object)),Nprompt)
+                draw_object = draw_object[0:len(draw_object)-1]
+            if enhance:
+                Nprompt = "sketches, (worst quality:2), (low quality:2), (normal quality:2), lowers, ((monochrome)), ((grayscale)), skin spots, acnes, skin blemishes, bad anatomy, DeepNegative, (fat:1.2), tilted head, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, jpeg artifacts, signature, watermark, username, blurry, bad feet, poorly drawn hands, poorly drawn face, mutation, deformed, signature, watermark"
+            else:
+                Nprompt = ""
+            stable_diffusion(str(translate(draw_object)),Nprompt,5)
             st.markdown("### User: ")
             st.markdown(prompt_text)
             st.markdown('### ChatGLM-6B: ')
+            request = chatglm_json(f"请介绍一下你画的关于{draw_object}", prompt_history, int(max_length), float(top_p), float(temperature))
+            request_list = json.loads(request)
+            detail = request_list.get('response')
+            st.markdown(detail)
             image = Image.open('stable_diffusion.png')
-            st.markdown(f'好的，这是通过 Stable Diffusion 画出的{draw_object}')
             st.image(image, caption=draw_object+' (Drawing with Stable Diffusion)')
             if adv_mode:
                 st.sidebar.markdown('Local History')
@@ -101,7 +113,9 @@ if mode == "Web":
             prompt_text = prompt
             if not feature == []:
                 send_begin = time.perf_counter()
-                web_info = search_main(str(prompt_text), feature)
+                search_resp = search_main(str(prompt_text), feature)
+                web_info = search_resp[1]
+                references = search_resp[0]
                 new_web_info = []
                 for items in web_info:
                     if len(items) >= web_max_length:
@@ -115,6 +129,7 @@ if mode == "Web":
                 response = request_list.get('response')
                 history = request_list.get('history')
                 write_result(prompt_text, response)
+                st.markdown(f'\n> <font size="1">Refrences:{references}</font>',unsafe_allow_html=True)
                 if adv_mode:
                     st.sidebar.markdown('Retrieved Info')
                     st.sidebar.json(new_web_info)
@@ -123,3 +138,33 @@ if mode == "Web":
                 st.sidebar.markdown(f'\n<font size="1">Response Time: {str(new_delta-delta_time)}</font>',unsafe_allow_html=True)
             else:
                 st.error('No feature selected')
+
+if mode == "CLIP":
+    uploaded_file = st.sidebar.file_uploader("Image", type=["bmp", "png", "jpg", "jpeg", "tiff"],accept_multiple_files=False)
+    if uploaded_file is not None:
+        file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+        opencv_image = cv2.imdecode(file_bytes, 1)
+        cv2.imwrite("clip_prelude.png", opencv_image)
+        st.sidebar.image(opencv_image,"输入的图片", channels="BGR")
+    if send:
+        if not prompt == "":
+            pic_prompt = clip_trans(clip_image("clip_prelude.png"))
+            send_begin = time.perf_counter()
+            prompt_text = prompt
+            new_prompt = f"我的问题是“{prompt_text}”，图片中的内容是“{pic_prompt}”请根据我的问题，参考图片中的内容以及你的理解进行回复"
+            request = chatglm_json(str(new_prompt), json.loads("[]"), int(max_length), float(top_p), float(temperature))
+            request_list = json.loads(request)
+            response = request_list.get("response")
+            history = request_list.get("history")
+            write_result(prompt_text, response)
+            image = Image.open('clip_prelude.png')
+            st.image(image, caption='输入的图片')
+            if adv_mode:
+                st.sidebar.markdown("Local History")
+                st.sidebar.json(history)
+            send_finish = time.perf_counter()
+            new_delta = float(f"{send_finish - send_begin:0.2f}")
+            st.sidebar.markdown(
+                f'\n<font size="1">Response Time: {str(new_delta-delta_time)}</font>',
+                unsafe_allow_html=True,
+            )
