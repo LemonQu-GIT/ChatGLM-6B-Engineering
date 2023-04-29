@@ -18,6 +18,10 @@ python webui.py --xformers --nowebui
 
 运行程序需要先运行 api.py，
 
+```powershell
+python api.py
+```
+
 再运行：
 
 ```powershell
