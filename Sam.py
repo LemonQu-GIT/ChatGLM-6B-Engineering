@@ -472,7 +472,7 @@ if __name__ == "__main__":
     parser.add_argument("--split", default=",", type=str, help="split for text prompt")
     parser.add_argument("--openai_key",
                         type=str,
-                        default='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',
+                        default='',
                         help="key for chatgpt")
     parser.add_argument("--openai_proxy", default=None, type=str, help="proxy for chatgpt")
     parser.add_argument("--output_dir", "-o", type=str, default="outputs", required=False, help="output directory")
