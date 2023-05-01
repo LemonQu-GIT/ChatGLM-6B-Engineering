@@ -225,7 +225,7 @@ class SearchBase:
         self.output_dir = 'outputs'
         self.box_threshold = 0.25
         self.text_threshold = 0.2
-        self.iou_threshold = 0.5
+        self.iou_threshold = 0.3
         self.device = 'cuda'
         # 函数调用参数
         self.image_pil = None
