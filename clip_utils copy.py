@@ -2,7 +2,8 @@ from PIL import Image
 from clip_interrogator import Config, Interrogator
 import requests, json
 import torch
-from Fun_tool import SearchBase
+# from Fun_tool import SearchBase
+from Sam import SearchBase
 global ci
 ci = Interrogator(Config(clip_model_name="ViT-L-14/openai"))
 # Config(caption_model='blip_image_captioning_large',clip_model_name="ViT-L-14/openai")
@@ -47,11 +48,11 @@ def clip_trans(word):
         torch_gc()
         ci = None
 
-def Tag2Text_trans(word):
+def Tag2Text_trans(word,target = None):
     chatbot = SearchBase()
     # chatbot.model_chatglm_load()
     chatbot.InitAllModel()
-    word = chatbot.SearcherInit(word)
+    word = chatbot.SearcherInit(word,target)
     chatbot.ModelFree()
     chatbot.SAMLoader()
     chatbot.SAMbaseonGroundingino()

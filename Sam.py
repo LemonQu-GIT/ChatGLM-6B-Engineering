@@ -419,7 +419,7 @@ class SearchBase:
         self.GroundingDinoModel = None
         self.tag2text_model = None
         pass
-    def SearcherInit(self, path2image):
+    def SearcherInit(self, path2image,target = None):
         self.ImageLoader(path2image=path2image)
         raw_image = self.image_pil.resize((384, 384))
         raw_image = self.transform(raw_image).unsqueeze(0).to(self.device)
@@ -431,7 +431,10 @@ class SearchBase:
         self.caption = res[2]
         print('\n', f"Caption: {self.caption}")
         print(f"Tags: {self.text_prompt}", '\n')
-
+        if target:
+            self.text_prompt = target
+        else:
+            pass
         # run grounding dino model
         self.boxes_filt, self.scores, self.pred_phrases = get_grounding_output(self.GroundingDinoModel,
                                                                                self.image,
@@ -472,14 +475,14 @@ if __name__ == "__main__":
     parser.add_argument("--split", default=",", type=str, help="split for text prompt")
     parser.add_argument("--chatglm",
                         type=str,
-                        default='',
+                        default=True,
                         help="key for chatgpt")
     parser.add_argument("--openai_proxy", default=None, type=str, help="proxy for chatgpt")
     parser.add_argument("--output_dir", "-o", type=str, default="outputs", required=False, help="output directory")
 
     parser.add_argument("--box_threshold", type=float, default=0.25, help="box threshold")
     parser.add_argument("--text_threshold", type=float, default=0.2, help="text threshold")
-    parser.add_argument("--iou_threshold", type=float, default=0.5, help="iou threshold")
+    parser.add_argument("--iou_threshold", type=float, default=0.3, help="iou threshold")
 
     parser.add_argument("--device", type=str, default="cuda", help="running on cpu only!, default=False")
     args = parser.parse_args(args=[])
@@ -553,7 +556,7 @@ if __name__ == "__main__":
 
     print(f"Caption: {caption}")
     print(f"Tags: {text_prompt}")
-
+    text_prompt = 'dog and sofa'
     # run grounding dino model
     boxes_filt, scores, pred_phrases = get_grounding_output(model,
                                                             image,

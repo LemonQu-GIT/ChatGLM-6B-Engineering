@@ -14,7 +14,7 @@ st.sidebar.expander('')
 st.sidebar.subheader('Parameters')
 prompt = st.sidebar.text_area('Prompt', help = "Text send  to ChatGLM-6B")
 send = st.sidebar.button("Send", key = "send_prompt", help = "Send text to ChatGLM-6B")
-mode = st.sidebar.radio("Feature",('Default', 'Web', 'CLIP', 'Stable Diffusion' 'GroungingInoSAMwithTag2Text',))
+mode = st.sidebar.radio("Feature",('Default', 'Web', 'CLIP', 'Stable Diffusion', 'GroungingInoSAM'))
 adv_mode = st.sidebar.checkbox('Advanced Settings')
 if adv_mode:
     max_length = st.sidebar.slider("Max Length", min_value = 1024, max_value = 8192, value = 2048, step = 1024, help = "Prompt Max Length")
@@ -72,8 +72,10 @@ if mode == "GroungingInoSAM":
         st.sidebar.image(opencv_image,"输入的图片", channels="BGR")
     if send:
         if not prompt == "":
+            target = re.findall(r"##(.*?)##", prompt)
+            prompt = re.sub(r"##(.*?)##",'', prompt)
             # pic_prompt = clip_trans(clip_image("clip_prelude.png"))
-            pic_prompt = Tag2Text_trans("GITS_picture.png")
+            pic_prompt = Tag2Text_trans("GITS_picture.png",target=target[0])
             send_begin = time.perf_counter()
             prompt_text = prompt
             new_prompt = f"我的问题是“{prompt_text}”，图片中的内容是“{pic_prompt}”请根据我的问题，参考图片中的内容以及你的理解进行回复"
