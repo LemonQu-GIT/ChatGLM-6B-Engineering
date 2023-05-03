@@ -1,0 +1,22 @@
+{
+    "basic": {
+        "port": 8000,
+        "host": "http://127.0.0.1"
+    },
+    "SD": {
+        "port": 7861,
+        "host": "http://127.0.0.1"
+    },
+    "Web": {
+        "ignore_url": [
+            "google.com",
+            "twitter.com",
+            "bit.ly",
+            "youtube.com"
+        ],
+        "git_token": ""
+    },
+    "CLIP":{
+        "model":"ViT-L-14/openai"
+    }
+}

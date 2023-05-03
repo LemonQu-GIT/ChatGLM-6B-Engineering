@@ -6,10 +6,10 @@ from streamlit_utils import *
 from clip_utils import * # WARNING: DO NOT RUN ON SAVE OR WILL CAUSE RESOURCE LEAK
 
 st.set_page_config(
-    page_title="ChatGLM-6B streamlit",
+    page_title="ChatGLM-6B",
     layout="wide"
 )
-st.title('ChatGLM-6B streamlit')
+st.title('ChatGLM-6B')
 st.sidebar.expander('')
 st.sidebar.subheader('Parameters')
 prompt = st.sidebar.text_area('Prompt', help = "Text send  to ChatGLM-6B")
@@ -88,6 +88,7 @@ if mode == "Stable Diffusion":
                 Nprompt = "sketches, (worst quality:2), (low quality:2), (normal quality:2), lowers, ((monochrome)), ((grayscale)), skin spots, acnes, skin blemishes, bad anatomy, DeepNegative, (fat:1.2), tilted head, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, jpeg artifacts, signature, watermark, username, blurry, bad feet, poorly drawn hands, poorly drawn face, mutation, deformed, signature, watermark"
             else:
                 Nprompt = ""
+            print(translate(draw_object))
             stable_diffusion(str(translate(draw_object)),Nprompt,5)
             st.markdown("### User: ")
             st.markdown(prompt_text)
@@ -106,7 +107,7 @@ if mode == "Stable Diffusion":
             st.sidebar.markdown(f'\n<font size="1">Response Time: {str(new_delta-delta_time)}</font>',unsafe_allow_html=True)
 
 if mode == "Web":
-    feature = st.sidebar.multiselect('Feature requests',['知乎专栏','知乎回复','百科','微信公众号','新闻','B站专栏','CSDN','GitHub'])
+    feature = st.sidebar.multiselect('Feature requests',['知乎专栏','知乎回复','百科','微信公众号','新闻','B站专栏','CSDN','GitHub','All(Preview)'])
     web_max_length = st.sidebar.number_input("Web info Max Length", min_value=0, step=1, value=200)
     if send:
         if not prompt == "":
@@ -122,7 +123,7 @@ if mode == "Web":
                         new_web_info.append(items[0:web_max_length])
                     else:
                         new_web_info.append(items)
-                ask_prompt = f'我的问题是“{prompt_text}”\n我在网上查询到了一些参考信息“{new_web_info}”\n请根据我的问题，参考我给与的信息以及你的理解进行回复'
+                ask_prompt = f'我的问题是“{prompt_text}”\n我在{references}上查询到了一些网络上的参考信息“{new_web_info}”\n请根据我的问题，参考我给与的信息以及你的理解进行回复'
                 print(ask_prompt)
                 request = chatglm_json(str(ask_prompt), json.loads("[]"), int(max_length), float(top_p), float(temperature))
                 request_list = json.loads(request)

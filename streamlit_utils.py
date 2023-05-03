@@ -1,8 +1,14 @@
-import requests, re, json, io, base64, os
+import requests, re, json, io, base64, os, time
 from urllib.parse import quote
 from bs4 import BeautifulSoup
+from selenium import webdriver
 from PIL import Image, PngImagePlugin
+from browser import *
 import streamlit as st
+
+def get_config():
+    with open("config.json") as f:
+        return json.load(f)
 
 def ext_zhihu(url):
 	if "/answer" in url:
@@ -25,26 +31,30 @@ def redirect_url(url):
 	return real_url
 
 def search_web(keyword):
-	headers = {
-		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44",
-	}
-	url = quote("https://www.sogou.com/web?query="+str(keyword),safe='/:?=.')
-	r = requests.get(url, headers=headers)
-	html = r.text
-	soup = BeautifulSoup(html, 'html.parser')
-	item_list = soup.find_all(class_='struct201102')
-	relist = []
-	for items in item_list:
-		item_prelist = items.find(class_ = "vr-title")
-		item_title = re.sub(r'(<[^>]+>|\s)','',str(item_prelist))
-		href_s = item_prelist.find(class_ = "", href=True)
-		href = href_s["href"]
-		if href[0] == "/":
-			href_f = redirect_url("https://www.sogou.com"+href)
-		else:
-			href_f = href
-		relist.append([item_title, href_f])
-	return relist
+    driver = webdriver.Chrome()
+    driver.get(quote("https://cn.bing.com/search?q="+str(keyword),safe='/:?=.'))
+    for i in range(0, 20000, 350):
+        time.sleep(0.1)
+        driver.execute_script('window.scrollTo(0, %s)' % i)
+    html = driver.execute_script("return document.documentElement.outerHTML")
+    soup = BeautifulSoup(html, 'html.parser')
+    item_list = soup.find_all(class_='b_algo')
+    relist = []
+    for items in item_list:
+        item_prelist = items.find('h2')
+        item_title = re.sub(r'(<[^>]+>|\s)','',str(item_prelist))
+        href_s = item_prelist.find("a", href=True)
+        href = href_s["href"]
+        relist.append([item_title, href])
+
+    item_list = soup.find_all(class_ ='na_cl')
+    for items in item_list:
+            item_prelist = items.find(class_ = f"nws_cwrp nws_itm_cjk item100", url=True, titletext=True)
+            if item_prelist is not None:
+                url = item_prelist["url"]
+                title = item_prelist["titletext"]
+                relist.append([title, url])
+    return relist
 
 def search_zhihu_que(url):
 	headers = {
@@ -100,7 +110,6 @@ def search_baike(url):
 		resp_json = json.loads(resp)
 		answer = resp_json.get('abstract')
 		return answer
-
 
 def search_wx(url):
 	headers = {
@@ -158,7 +167,7 @@ def search_csdn(url):
 	return item_title
 
 def search_github(keyword):
-	token = os.getenv('git_token')
+	token = get_config().get('Web').get('git_token')
 	if not token == None:
 		headers={"Authorization":"token "+ str(token)}
 	else:
@@ -200,31 +209,44 @@ def search_main(item, feature):
 			return_list.append(ans)
 			flist.append("https://github.com/"+githubresp[0])
 	for items in web_list:
-		if "zhihu.com/question/" in items[1] and '知乎回复' in feature:
+		if "zhihu.com/question/" in items[1] and '知乎回复' or 'All(Preview)' in feature:
 			return_list.append(str(search_zhihu_que(ext_zhihu(items[1]))))
 			flist.append(items[1])
-		if "baike.sogou.com" in items[1] and '百科' in feature:
+		if "baike.sogou.com" in items[1] and '百科' or 'All(Preview)' in feature:
 			return_list.append(str(search_baike(items[1])))
 			flist.append(items[1])
-		if "mp.weixin.qq.com" in items[1] and '微信公众号' in feature:
+		if "mp.weixin.qq.com" in items[1] and '微信公众号' or 'All(Preview)' in feature:
 			return_list.append(str(search_wx(items[1])))
 			flist.append(items[1])
-		if "zhuanlan.zhihu.com" in items[1] and '知乎专栏' in feature:
+		if "zhuanlan.zhihu.com" in items[1] and '知乎专栏' or 'All(Preview)' in feature:
 			return_list.append(str(search_zhihu_zhuanlan(items[1])))
 			flist.append(items[1])
-		if "163.com/dy/article/" in items[1] and '新闻' in feature:
+		if "163.com/dy/article/" in items[1] and '新闻' or 'All(Preview)' in feature:
 			return_list.append(str(search_news_163(items[1])))
 			flist.append(items[1])
-		if "sohu.com/a/" in items[1] and '新闻' in feature:
+		if "sohu.com/a/" in items[1] and '新闻' or 'All(Preview)' in feature:
 			return_list.append(str(search_news_sohu(items[1])))
 			flist.append(items[1])
-		if "bilibili.com/read/" in items[1] and 'B站专栏' in feature:
+		if "bilibili.com/read/" in items[1] and 'B站专栏' or 'All(Preview)' in feature:
 			return_list.append(str(search_bilibili(items[1])))	
 			flist.append(items[1])
-		if "blog.csdn.net" in items[1] and 'CSDN' in feature:
+		if "blog.csdn.net" in items[1] and 'CSDN' or 'All(Preview)' in feature:
 			return_list.append(str(search_csdn(items[1])))
 			flist.append(items[1])
+		if 'All(Preview)' in feature:
+			if not 'zhihu.com/question/' or not 'baike.sogou.com' or not 'mp.weixin.qq.com' or not 'zhuanlan.zhihu.com' or not '163.com/dy/article/' or not 'sohu.com/a/' or not 'bilibili.com/read/' or not 'blog.csdn.net' in items[1]:
+				if not test_if_url_ignore(items[1]):
+					ans = search_not(items[1])
+					if ans is not None:
+						return_list.append(ans)
+						flist.append(items[1])
 	return [flist,return_list]
+
+def test_if_url_ignore(test_url):
+	for url in get_config().get('Web').get('ignore_url'):
+		if url in test_url:
+			return True
+	return False
 
 def test_if_zhcn(string):
     for ch in string:
@@ -254,7 +276,7 @@ def translate(word):
         return word
 
 def chatglm_json(prompt, history, max_length, top_p, temperature):
-    url = "http://127.0.0.1:8000"
+    url = str(get_config().get('basic').get('host'))+":"+str(get_config().get('basic').get('port'))
     payload = {
         "prompt": prompt,
         "history": history,
@@ -268,7 +290,7 @@ def chatglm_json(prompt, history, max_length, top_p, temperature):
     return json_resp_raw_list
 
 def stable_diffusion(Pprompt,Nprompt, steps):
-    url = "http://127.0.0.1:7861"
+    url = str(get_config().get('SD').get('host'))+":"+str(get_config().get('SD').get('port'))
     payload = {
         "prompt": Pprompt,
         "steps": steps,

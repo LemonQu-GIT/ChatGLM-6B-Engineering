@@ -1,9 +1,14 @@
 from PIL import Image
 from clip_interrogator import Config, Interrogator
-import requests, json
+from streamlit_utils import *
+import requests, json, torch
+
+DEVICE = "cuda"
+DEVICE_ID = "0"
+CUDA_DEVICE = f"{DEVICE}:{DEVICE_ID}" if DEVICE_ID else DEVICE
 
 global ci
-ci = Interrogator(Config(clip_model_name="ViT-L-14/openai"))
+ci = Interrogator(Config(clip_model_name=get_config().get('CLIP').get('model')))
 
 def clip_image(filename):
     global ci
@@ -27,3 +32,10 @@ def clip_trans(word):
         list_trans = response.text
         result = json.loads(list_trans)
         return result["translateResult"][0][0]["tgt"]
+
+def torch_gc():
+    if torch.cuda.is_available():
+        with torch.cuda.device(CUDA_DEVICE):
+            torch.cuda.empty_cache()
+            torch.cuda.ipc_collect()
+
