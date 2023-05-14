@@ -55,4 +55,6 @@ if __name__ == '__main__':
 history = []
 tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True)
 model = AutoModel.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True).quantize(4).half().cuda()
+#tokenizer = AutoTokenizer.from_pretrained(r"E:\huggingface\models--THUDM--chatglm-6b\snapshots\658202d88ac4bb782b99e99ac3adff58b4d0b813", trust_remote_code=True)
+#model = AutoModel.from_pretrained(r"E:\huggingface\models--THUDM--chatglm-6b\snapshots\658202d88ac4bb782b99e99ac3adff58b4d0b813", trust_remote_code=True).quantize(4).half().cuda()
 model.eval()

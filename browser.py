@@ -29,7 +29,6 @@ def replaceCharEntity(htmlstr):
     re_charEntity=re.compile(r'&#?(?P<name>\w+);')
     sz=re_charEntity.search(htmlstr)
     while sz:
-        entity=sz.group()
         key=sz.group('name')
         try:
             htmlstr=re_charEntity.sub(CHAR_ENTITIES[key],htmlstr,1)
