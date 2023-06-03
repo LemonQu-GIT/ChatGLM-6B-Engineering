@@ -1,102 +1,91 @@
-# ChatGLM-6B-Engineering
+# ChatGLM-6B Web UI
 
-Re-edit from [ChatGLM-6B](https://github.com/THUDM/ChatGLM-6B)
+本项目参考于
 
-https://www.bilibili.com/video/BV1gX4y1B7PV
+* https://gitee.com/MIEAPP/chatai-vue
+* https://gitee.com/MIEAPP/chatai-python
+* https://github.com/LemonQu-GIT/ChatGLM-6B-Engineering
 
-## 介绍
+并进行多许修改以适配 ChatGLM-6B
 
-ChatGLM-6B 是一个开源的、支持中英双语的对话语言模型，基于 [General Language Model (GLM)](https://github.com/THUDM/GLM) 架构，具有 62 亿参数。结合模型量化技术，用户可以在消费级的显卡上进行本地部署
+项目基于 MIT License
 
-本项目基于 ChatGLM-6B 进行了后期调教，支持网上搜索及生成图片
+## 示例
 
-生成图片则需要本地部署 [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui) 并加载 API：
-
-```powershell
-python webui.py --xformers --nowebui
-```
-
-运行程序需要先运行 api.py，
-
-再运行：
-
-```powershell
-streamlit run streamlit_new.py
-```
-
-加载完成后在 http://localhost:8501/ 中查看
-
-## 功能
+![image](img\main_menu.png)
 
 ### 基本对话
 
-可支持上下文对话
-
-![Basic](examples/basic.png "基本对话")
-
-### 生成图片
-
-需要 [Stable Diffusion](https://github.com/AUTOMATIC1111/stable-diffusion-webui) 支持
-
-![Stable Diffusion](examples/sd.png "Stable Diffusion")
+![image](img\default.png "基本对话")
 
 ### 网络搜索
 
-![Web](examples/web.png "网络搜索")
+![image](img\gpt4.png "网络搜索")
 
-### [CLIP](https://github.com/openai/CLIP) (Preview)
+### Stable Diffusion
 
-需要 CLIP Interrogator 支持
+![image](img\sd.png "Stable Diffusion")
 
-![CLIP](examples/clip.png)
+### Generate Code
 
-## 运行时错误
+![image](img\web_1.png "Generate Code")
 
-AssertionError: Torch not compiled with CUDA enabled
+![image](img\web_2.png "Generate Code")
 
-RuntimeError: CUDA error: no kernel image is available for execution on the device
+## 部署
 
-请运行
+* ChatGLM-6B
 
-```powershell
-nvidia-smi
-```
+  > https://github.com/THUDM/ChatGLM-6B
 
-及
+* Stable Diffusion
 
-```powershell
-nvcc -V
-```
+  > 由于最新版的 Stable Diffusion API 调用存在问题，本项目 Stable Diffusion 使用以下版本
+  >
+  > https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/35b1775b32a07f1b7c9dccad61f7aa77027a00fa
 
-查看结果 如都正常无 error ，请运行
+* ChatGLM-6B-Engineering
 
-```python
-import torch
-print(torch.cuda.is_available())
-```
+  > https://github.com/LemonQu-GIT/ChatGLM-6B-Engineering
 
-**如返回为 True，**
+1. 运行 ChatGLM-6B API (Port 8000)
 
-请将在api.py中第57行
+   ```shell
+   python api.py
+   ```
 
-```python
-model = AutoModel.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True).quantize(4).half().cuda()
-```
+2. 运行 Stable Diffusion API (Port 7861)
 
-更改为
+   ```shell
+   python webui.py -nowebui
+   ```
 
-```python
-model = AutoModel.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True).half().cuda()
-```
+3. 运行 ChatGLM-6B-WebUI API (Port 8003)
 
-**如返回为 False**
+   ```shell
+   python front_end.py
+   ```
 
-请确认自己是否已安装gpu版本的torch
+4. 运行 npm (Port 8080) v14.21.3
 
-可参考网络教程
+   ```shell
+   npm install -g yarn
+   #yarn config set registry https://registry.npm.taobao.org -g
+   #yarn config set sass_binary_site http://cdn.npm.taobao.org/dist/node-sass -g
+   yarn install
+   yarn dev
+   ```
 
-若设备无 nvidia 显卡，可参考 [Readme](https://github.com/THUDM/ChatGLM-6B/blob/main/README.md) 修改模型为 cpu 量化模型
+   
 
-## 引用
 
-Forked from https://github.com/THUDM/ChatGLM-6B
+## 限制
+
+* 对自我认知上会出现问题（如认为自己是由 OpenAI 开发的等）
+* 会“随便”生成图片（即用户的命令回复是一张图片等）
+* 会对用户有冒犯性的语句
+* 生成的图片未加限制（会出现 NSFW img）
+
+如下图
+
+![image](img\offensive.png)
