@@ -23,7 +23,7 @@ pnpm-debug.log*
 
 package-lock.json
 yarn.lock
-
+cache/
 .history/
 __pycache__/
 cache/

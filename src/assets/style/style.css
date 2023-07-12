@@ -1,0 +1,122 @@
+@font-face {
+  font-family: "TestSöhne";
+  src: url("./font/TestSöhne.otf");
+  font-weight: normal;
+  font-style: normal;
+}
+html,
+body {
+  height: 100%;
+  width: 100%;
+}
+
+#app {
+  height: 100%;
+}
+
+.main-title {
+  font-family: "TestSöhne";
+}
+
+.flex_row_c_c {
+  display: flex;
+  align-content: center;
+  flex-direction: row;
+  justify-items: center;
+}
+
+.react-scroll-to-bottom--css-krija-1n7m0yu {
+  height: 100%;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.code_header {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.prose :where(code):not(:where([class~="not-prose"] *)):before {
+  content: "" !important;
+}
+
+.prose :where(code):not(:where([class~="not-prose"] *)):after {
+  content: "" !important;
+}
+
+#chatRepeat:focus {
+  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+	var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+	calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+  --tw-ring-offset-width: 0px;
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+	0 0 transparent;
+  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+	var(--tw-shadow, 0 0 transparent);
+}
+
+.suitable_selected {
+  --tw-text-opacity: 1 !important;
+  cursor: auto !important;
+}
+
+.load_dot1 {
+  -webkit-animation: blink 1s steps(2, start) infinite;
+  animation: blink 1s steps(2, start) infinite;
+}
+
+.load_dot2 {
+  -webkit-animation: blink 1s steps(3, start) infinite;
+  animation: blink 1s steps(3, start) infinite;
+}
+
+.load_dot3 {
+  -webkit-animation: blink 1s steps(4, start) infinite;
+  animation: blink 1s steps(4, start) infinite;
+}
+
+#app .markdown h1 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
+}
+
+#app .markdown h2 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
+}
+
+#app .markdown h3 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
+}
+
+#app .markdown h4 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
+}
+
+#app .markdown h5 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
+}
+
+#app .markdown h6 {
+  margin-bottom: 0rem;
+  margin-top: 0rem;
+}
+
+@media (max-width: 640px) {
+  #app .none {
+	display: none;
+  }
+}
+
+.w-180px {
+  width: 180px;
+}
+
+.prose-r {
+  font-size: 1rem;
+  line-height: 1.75;
+}

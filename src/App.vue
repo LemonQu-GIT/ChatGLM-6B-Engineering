@@ -4,7 +4,7 @@
       <div class="overflow-hidden w-full h-full relative">
         <div class="flex h-full flex-1 flex-col md:pl-[260px]">
           <div
-            class="sticky top-0 z-10 flex items-center border-b border-white/20 bg-gray-800 pl-1 pt-1 text-gray-200 sm:pl-3 md:hidden gradient_background"
+            class="sticky top-0 z-10 flex items-center border-b border-white/20 bg-gray-800 pl-1 pt-1 text-gray-200 sm:pl-3 md:hidden"
           >
             <div>
               <button
@@ -269,6 +269,13 @@
                               <div
                                 class="text-gray-400 flex self-end lg:self-center justify-center mt-2 gap-3 md:gap-4 lg:gap-1 lg:absolute lg:top-0 lg:translate-x-full lg:right-0 lg:mt-0 lg:pl-2 visible"
                               >
+                              <button
+                                  @click.stop="copy(idx, conv, -1)"
+                                  class="p-1 rounded-md hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200 disabled:dark:hover:text-gray-400"
+                                >
+                                <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                                </button>
+
                                 <button
                                   @click.stop="suitable(idx, conv, 1)"
                                   v-if="
@@ -342,7 +349,8 @@
                         class="text-4xl font-semibold text-center mt-6 sm:mt-[20vh] ml-auto mr-auto mb-10 sm:mb-16 flex gap-2 items-center justify-center main-title"
                       >
                         ChatGLM-6B
-                        <span class="rounded-md bg-yellow-200 px-1.5 py-0.5 text-xs font-medium uppercase text-gray-800">Engineering</span>
+                        <span class="rounded-md bg-yellow-200 px-1.5 py-0.5 text-xs font-medium text-gray-800">v2</span>
+                        <!-- <span class="rounded-md bg-yellow-200 px-1.5 py-0.5 text-xs font-medium uppercase text-gray-800">Engineering</span> -->
                       </h1>
                       <div class="md:flex items-start text-center gap-3.5">
                         <div
@@ -407,12 +415,12 @@
                             <button
                               @click="
                                 inputChat(
-                                  '请画一张小鸟在森林中飞翔的图片'
+                                  '请画一张小鸟飞翔的图片'
                                 )
                               "
                               class="w-full bg-gray-50 dark:bg-white/5 p-3 rounded-md hover:bg-gray-200 dark:hover:bg-gray-900"
                             >
-                              "请画一张小鸟在森林中飞翔的图片" →
+                              "请画一张小鸟飞翔的图片" →
                             </button>
                             <button
                               @click="
@@ -465,22 +473,17 @@
                             <li
                               class="w-full bg-gray-50 dark:bg-white/5 p-3 rounded-md"
                             >
-                              可以记住用户之前输入的内容
+                              可以记住用户之前输入的内容，即支持上下文对话
                             </li>
                             <li
                               class="w-full bg-gray-50 dark:bg-white/5 p-3 rounded-md"
                             >
-                              可以生成图片
+                              可以通过用户的需求生成图片
                             </li>
                             <li
                               class="w-full bg-gray-50 dark:bg-white/5 p-3 rounded-md"
                             >
                               可以通过网络搜索信息
-                            </li>
-                            <li
-                              class="w-full bg-gray-50 dark:bg-white/5 p-3 rounded-md"
-                            >
-                              ？？？？？
                             </li>
                           </ul>
                         </div>
@@ -521,12 +524,13 @@
                             <li
                               class="w-full bg-gray-50 dark:bg-white/5 p-3 rounded-md"
                             >
-                              可能偶尔会产生有害的回答或有偏见的内容
+                              可能会触发自己不想要的功能，例如生成图片或网络搜索
                             </li>
+
                             <li
                               class="w-full bg-gray-50 dark:bg-white/5 p-3 rounded-md"
                             >
-                              有些用户输入的指令可能无法记住或再次使用
+                              用户输入的指令有时可能无法记住或再次使用
                             </li>
                           </ul>
                         </div>
@@ -634,19 +638,19 @@
                     </button>
                   </div>
                   <div
-                    class="flex flex-col w-full py-2 flex-grow md:py-3 md:pl-4 relative border border-black/10 bg-white dark:border-gray-900/50 dark:text-white dark:bg-gray-700 rounded-md shadow-[0_0_10px_rgba(0,0,0,0.10)] dark:shadow-[0_0_15px_rgba(0,0,0,0.10)]"
-                  >
+                    class="flex flex-col w-full py-[10px] flex-grow md:py-4 md:pl-4 relative border border-black/10 bg-white dark:border-gray-900/50 dark:text-white dark:bg-gray-700 rounded-xl shadow-xs dark:shadow-xs"
+                    style="border-radius: 15px;
+                    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.05);"
+                    >
                     <textarea
                       v-model="chatMsg"
                       ref="inputChat"
                       @keydown="judgeInput"
                       tabindex="0"
                       data-id="root"
-                      style="
-                        max-height: 200px;
+                      style="max-height: 200px;
                         height: 24px;
-                        overflow-y: hidden;
-                      "
+                        overflow-y: hidden;"
                       rows="1"
                       placeholder="发送信息..."
                       class="m-0 w-full resize-none border-0 bg-transparent p-0 pl-2 pr-7 focus:ring-0 focus-visible:ring-0 dark:bg-transparent md:pl-0"
@@ -654,6 +658,7 @@
                     <button
                       @click.stop.prevent="send"
                       :disabled="convLoading"
+                      style="margin-right: 10px;"
                       class="absolute p-1 rounded-md bottom-[10px] md:bottom-3 md:p-2 md:right-3 dark:hover:bg-gray-900 dark:disabled:hover:bg-transparent right-1 disabled:text-gray-400 enabled:bg-brand-purple text-white transition-colors disabled:opacity-40"
                     >
                       <div
@@ -697,6 +702,13 @@
                   >ChatGLM-6B</a
                 >，
                 <a
+                  href="https://github.com/THUDM/ChatGLM2-6B"
+                  target="_blank"
+                  rel="noreferrer"
+                  class="underline"
+                  >ChatGLM2-6B</a
+                >，
+                <a
                   href="https://gitee.com/MIEAPP/chatai-vue"
                   target="_blank"
                   rel="noreferrer"
@@ -704,19 +716,19 @@
                   >chatai-vue</a
                 >，
                 <a
-                  href="https://gitee.com/MIEAPP/chatai-python"
+                  href="https://github.com/LemonQu-GIT/ChatGLM-6B-Engineering"
                   target="_blank"
                   rel="noreferrer"
                   class="underline"
-                  >chatai-python</a
-                >， 基于 MIT License
+                  >ChatGLM-6B-Engineering</a
+                >
               </div>
             </div>
           </main>
         </div>
 
         <div
-          class="dark hidden bg-gray-900 md:fixed md:inset-y-0 md:flex md:w-[260px] md:flex-col gradient_background"
+          class="dark hidden bg-gray-900 md:fixed md:inset-y-0 md:flex md:w-[260px] md:flex-col"
         >
           <div class="flex h-full min-h-0 flex-col">
             <div
@@ -729,7 +741,7 @@
               >
                 <a
                   @click.stop="newChat"
-                  class="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white cursor-pointer text-sm mb-2 flex-shrink-0 border border-white/20 gradient_button"
+                  class="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white cursor-pointer text-sm mb-2 flex-shrink-0 border border-white/20"
                 >
                   <svg
                     stroke="currentColor"
@@ -748,7 +760,7 @@
                   </svg>
                   创建新对话
                 </a>
-
+                
                 <div
                   class="flex-col flex-1 overflow-y-auto border-b border-white/20"
                   style="padding-bottom: 5px"
@@ -831,7 +843,7 @@
                       <a
                         v-else-if="conversation.delete"
                         @blur="cancelDelConv(cidx, conversation)"
-                        class="m-focus flex py-3 px-3 items-center gap-3 relative rounded-md cursor-pointer break-all pr-14 bg-gray-800 hover:bg-gray-800 group gradient_chat"
+                        class="m-focus flex py-3 px-3 items-center gap-3 relative rounded-md cursor-pointer break-all pr-14 bg-gray-800 hover:bg-gray-800 group"
                       >
                         <svg
                           stroke="currentColor"
@@ -1084,7 +1096,7 @@
                 >
 
                 <a
-                  href="https://github.com/THUDM/ChatGLM-6B"
+                  href="https://github.com/THUDM/ChatGLM2-6B"
                   target="_blank"
                   class="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white cursor-pointer text-sm"
                 >
@@ -1106,10 +1118,10 @@
                     />
                   </svg>
 
-                  ChatGLM-6B 源码</a
+                  ChatGLM2-6B 源码</a
                 >
                 <a
-                  href="https://github.com/LemonQu-GIT/ChatGLM-6B-WebUI"
+                  href="https://github.com/LemonQu-GIT/ChatGLM-6B-Engineering"
                   target="_blank"
                   class="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white cursor-pointer text-sm"
                 >
@@ -1133,28 +1145,16 @@
                   </svg>
                   关于此项目</a
                 >
-                <label for="file-upload" class="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white cursor-pointer text-sm">
-                  <svg
-                    stroke="currentColor"
-                    fill="none"
-                    stroke-width="2"
-                    viewBox="0 0 24 24"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    class="h-4 w-4"
-                    height="1em"
-                    width="1em"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                    d="M12.367 2.453a.822.822 0 0 0-.576.238L.241 14.213a.822.822 0 0 0-.241.584v.066c0-.323.209-.608.516-.709l7.275-2.318a2.437 2.437 0 0 0 1.584-1.592l2.318-7.267a.757.757 0 0 1 .719-.524zM0 14.863v5.047c0 .904.733 1.637 1.637 1.637h20.726c.904 0 1.637-.733 1.637-1.637V4.09c0-.904-.733-1.637-1.637-1.637h-9.951v.5l.088 9.861c.01 1.175-.962 2.14-2.137 2.14L0 14.862zM12 3.66l-2.148 6.735v.001a2.94 2.94 0 0 1-1.909 1.916l-6.716 2.141h9.136c.905 0 1.638-.734 1.637-1.639zm-10.363.975c-.905 0-1.638.734-1.637 1.638v7.473l9.135-9.111Z"
-                    ></path>
-                    <polyline points="15 3 21 3 21 9"></polyline>
-                    <line x1="10" y1="14" x2="21" y2="3"></line>
-                  </svg>
-                  附加文件
-                </label>
-                <input id="file-upload" type="file" style="display: none" @change="handleFileUpload" accept="image/png, image/jpeg, .xls, .xlsx, .doc, .docx, .pdf, .txt, .py, .c, .cpp, .java, .html, .js">
+                <a
+                  @click.stop.prevent="moreBarShow"
+                  class="flex py-3 px-3 items-center gap-3 rounded-md hover:bg-gray-500/10 transition-colors duration-200 text-white cursor-pointer text-sm"
+                >
+                <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+              
+              <div class="grow overflow-hidden text-ellipsis whitespace-nowrap text-left text-white">更多</div>
+              <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 flex-shrink-0 text-gray-500" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>
+                </a>
+                
               </nav>
             </div>
           </div>
@@ -1233,6 +1233,8 @@
       </div>
     </div>
 
+    
+
     <div portal-container="">
       <span
         class="pointer-events-none fixed inset-0 z-[60] mx-auto my-2 flex max-w-[560px] flex-col items-stretch justify-start md:pb-5"
@@ -1287,27 +1289,27 @@
                   </div>
                   <div class="prose dark:prose-invert">
                     <div class="mb-5">
-                      <h2 class="!mt-4 font-normal !mb-2"><b>ChatGLM-6B</b></h2>
+                      <h2 class="!mt-4 font-normal !mb-2"><b>ChatGLM2-6B</b></h2>
                     </div>
                     <div class="w-full h-[1px] bg-gray-300 opacity-20"></div>
                     <h4 class="mb-4">
-                      本项目基于 ChatGLM-6B，UI 前端来源于 <br />
+                      本项目基于 ChatGLM2-6B，UI 前端来源于 <br />
                       • https://gitee.com/MIEAPP/chatai-vue <br />
                     </h4>
                     <div class="flex gap-4 flex-col text-sm">
                       <div
                         class="flex p-4 bg-gray-50 dark:bg-white/5 rounded-md items-center gap-4 min-h-[71px]"
                       >
-                        <div class="w-10 text-2xl text-center">🚨</div>
+                        <div class="w-10 text-2xl text-center">🌐</div>
                         <div class="flex-1 leading-5">
-                          本项目使用 MIT License
+                          本项目类 OpenAI Plugin ，欢迎提出意见与更好的想法
                         </div>
                       </div>
                       <div
                         class="flex p-4 bg-gray-50 dark:bg-white/5 rounded-md items-center gap-4 min-h-[71px]"
                       >
-                        <div class="w-10 text-2xl text-center">😊</div>
-                        <div class="flex-1 leading-5">仅供测试</div>
+                        <div class="w-10 text-2xl text-center">🖌️</div>
+                        <div class="flex-1 leading-5">仅供测试，欢迎反馈 Issue</div>
                       </div>
                     </div>
                     <div class="flex gap-4 mt-6">
@@ -1403,7 +1405,265 @@
         ></button>
       </div>
     </div>
-  </div>
+
+    <!-- Tool bar-->
+    <div id="headlessui-portal-root" v-if="moreBar">
+      <div data-headlessui-portal="">
+        <button
+          type="button"
+          aria-hidden="true"
+          style="
+            position: fixed;
+            top: 1px;
+            left: 1px;
+            width: 1px;
+            height: 0px;
+            padding: 0px;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0px, 0px, 0px, 0px);
+            white-space: nowrap;
+            border-width: 0px;
+          "
+        ></button>
+        <div>
+          <div
+            class="relative z-50"
+            id="headlessui-dialog-:r3:"
+            role="dialog"
+            aria-modal="true"
+            data-headlessui-state="open"
+            aria-labelledby="headlessui-dialog-title-:r5:"
+          >
+          
+            <div
+              class="fixed inset-0 bg-gray-500/90 transition-opacity dark:bg-gray-800/90"
+            ></div>
+            <div class="fixed inset-0 z-50 overflow-y-auto">
+              <div
+                class="grid h-full w-full justify-center"
+              >
+                <div
+                  v-if="moreBar"
+                  class="col-auto relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 shadow-xl transition-all dark:bg-gray-900 sm:my-8 w-full sm:p-6 opacity-100 translate-y-0 sm:scale-100"
+                  id="headlessui-dialog-panel-:r1:"
+                  style="width: 700px;
+                    height: auto;
+                    align-items: center;
+                    margin: auto;"
+                >
+                  <div class="flex items-center sm:flex">
+                    <div class="mt-3 text-center sm:mt-0 sm:text-left"></div>
+                  </div>
+                      <h3 class="mt-1 font-normal"
+                      style="margin-bottom: 20px;"
+                      ><b>
+                        更多
+                        <span class="rounded-md bg-yellow-200 px-1.5 py-0.5 text-xs font-medium uppercase text-gray-800" style="margin-left: 7px;">Engineering</span>
+                        <button
+                          @click="moreBarClose"
+                          class="gap-2"
+                          style="float: right;"
+                        >
+                        <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" class="text-gray-900 dark:text-gray-200" height="20" width="20" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                      </b></h3>
+                    <div class="flex gap-4 flex-col text-sm">
+                      
+                      <div class="flex flex-col gap-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div class="border-b pb-3 last-of-type:border-b-0 dark:border-gray-700">
+                          <div class="flex items-center justify-between">
+                            <div>启用网络搜索</div>
+                            <button
+                              type="button"
+                                role="switch"
+                                aria-checked="true"
+                                class="swi-button"
+                                :class="{'switch-on': enableWeb, 'switch-off': !enableWeb}"
+                                @click="switchButton('web')"
+                              >
+                                <span class="switch-thumb"></span>
+                            </button>
+                          </div>
+                          <div class="mt-2 text-xs text-gray-500 dark:text-gray-600">允许调用后端的爬虫以访问已配置的网站数据，访问网站时不会通过你的 Cookie 访问</div>
+                        </div>
+                      </div>
+
+                      <div class="flex flex-col gap-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div class="border-b pb-3 last-of-type:border-b-0 dark:border-gray-700">
+                          <div class="flex items-center justify-between">
+                            <div>启用天气</div>
+                            <button
+                              type="button"
+                                role="switch"
+                                aria-checked="true"
+                                class="swi-button"
+                                :class="{'switch-on': enableWeather, 'switch-off': !enableWeather}"
+                                @click="switchButton('weather')"
+                              >
+                                <span class="switch-thumb"></span>
+                            </button>
+                          </div>
+                          <div class="mt-2 text-xs text-gray-500 dark:text-gray-600">允许访问 <a href="https://www.qweather.com/" target="_blank" class="underline" rel="noreferrer">天气 API</a> 以获取天气数据</div>
+                        </div>
+                      </div>
+
+                      <div class="flex flex-col gap-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div class="border-b pb-3 last-of-type:border-b-0 dark:border-gray-700">
+                          <div class="flex items-center justify-between">
+                            <div>启用时间查询</div>
+                            <button
+                              type="button"
+                                role="switch"
+                                aria-checked="true"
+                                class="swi-button"
+                                :class="{'switch-on': enableDate, 'switch-off': !enableDate}"
+                                @click="switchButton('date')"
+                              >
+                                <span class="switch-thumb"></span>
+                            </button>
+                          </div>
+                          <div class="mt-2 text-xs text-gray-500 dark:text-gray-600">允许获取当前阴历、阳历日期及时间</div>
+                        </div>
+                      </div>
+
+                      <div class="flex flex-col gap-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div class="border-b pb-3 last-of-type:border-b-0 dark:border-gray-700">
+                          <div class="flex items-center justify-between">
+                            <div>附加文件</div>
+                            <button class="btn relative btn-neutral">
+                              <label for="file_upload">
+                                <div class="flex w-full gap-2 items-center justify-center">上传文件</div>
+                              </label>
+                              <input id="file_upload" type="file" style="display: none" @change="handleFileUpload" accept="image/png, image/jpeg, .xls, .xlsx, .doc, .docx, .pdf, .txt, .py, .c, .cpp, .java, .html, .js">
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div class="flex flex-col gap-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div class="border-b pb-3 last-of-type:border-b-0 dark:border-gray-700">
+                          <div class="flex items-center justify-between">
+                            <div>启用 Markmap</div>
+                            <button
+                              type="button"
+                                role="switch"
+                                aria-checked="true"
+                                class="swi-button"
+                                :class="{'switch-on': enableMarkmap, 'switch-off': !enableMarkmap}"
+                                @click="switchButton('markmap')"
+                              >
+                                <span class="switch-thumb"></span>
+                            </button>
+                          </div>
+                          <div class="mt-2 text-xs text-gray-500 dark:text-gray-600">允许调用后端调用本地 <a href="https://markmap.js.org/" target="_blank" class="underline" rel="noreferrer">Markmap</a> 以生成思维导图</div>
+                        </div>
+                      </div>
+
+                      <div class="flex flex-col gap-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div class="border-b pb-3 last-of-type:border-b-0 dark:border-gray-700">
+                          <div class="flex items-center justify-between">
+                            <div>启用 Stable Diffusion</div>
+                            <button
+                              type="button"
+                                role="switch"
+                                aria-checked="true"
+                                class="swi-button"
+                                :class="{'switch-on': enableStableDiffusion, 'switch-off': !enableStableDiffusion}"
+                                @click="switchButton('sd')"
+                              >
+                                <span class="switch-thumb"></span>
+                            </button>
+                          </div>
+                          <div class="mt-2 text-xs text-gray-500 dark:text-gray-600">允许调用后端调用本地 <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/35b1775b32a07f1b7c9dccad61f7aa77027a00fa" target="_blank" class="underline" rel="noreferrer">Stable Diffusion API</a> 以生成图片  </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  <div
+                    class="mt-5 flex flex-col gap-3 sm:mt-4 sm:flex-row-reverse"
+                  ></div>
+                </div>
+                <div
+                  v-if="false"
+                  class="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all dark:bg-gray-900 sm:my-8 sm:w-full sm:p-6 sm:max-w-lg"
+                  id="headlessui-dialog-panel-:r4:"
+                  data-headlessui-state="open"
+                >
+                  <div class="flex items-center sm:flex">
+                    <div
+                      class="mr-4 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full sm:h-10 sm:w-10 bg-green-100"
+                    >
+                      <svg
+                        stroke="currentColor"
+                        fill="none"
+                        stroke-width="1.5"
+                        viewBox="0 0 24 24"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="h-6 w-6 text-green-700"
+                        height="1em"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"
+                        ></path>
+                      </svg>
+                    </div>
+                    <div class="mt-3 text-center sm:mt-0 sm:text-left">
+                      <h3
+                        class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-200"
+                        id="headlessui-dialog-title-:r5:"
+                        data-headlessui-state="open"
+                      >
+                        Provide additional feedback
+                      </h3>
+                    </div>
+                  </div>
+                  <form>
+                    <textarea
+                      id="feedback-other"
+                      placeholder="What would the ideal answer have been?"
+                      rows="3"
+                      class="mt-4 mb-1 w-full rounded-md dark:bg-gray-800 dark:focus:border-white dark:focus:ring-white"
+                      tabindex="0"
+                      style="height: 89.4815px; overflow-y: hidden"
+                    ></textarea>
+                  </form>
+                  <div
+                    class="mt-5 flex flex-col gap-3 sm:mt-4 sm:flex-row-reverse"
+                  >
+                    <button class="btn flex justify-center gap-2 btn-neutral">
+                      Submit feedback
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button
+          type="button"
+          aria-hidden="true"
+          style="
+            position: fixed;
+            top: 1px;
+            left: 1px;
+            width: 1px;
+            height: 0px;
+            padding: 0px;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0px, 0px, 0px, 0px);
+            white-space: nowrap;
+            border-width: 0px;
+          "
+        ></button>
+      </div>
+    </div>
+
+</div>
 </template>
 
 <script>
@@ -1411,8 +1671,7 @@ import { marked } from "marked";
 import hljs from "highlight.js";
 import "./assets/index.css";
 import "highlight.js/styles/github.css";
-
-document.title = "ChatGLM-6B";
+document.title = "ChatGLM2-6B";
 const Http = new XMLHttpRequest();
 const url = process.env.VUE_APP_API+"/api/delete";
 Http.open("POST", url);
@@ -1420,8 +1679,6 @@ Http.send();
 Http.onreadystatechange = (e) => {
   if (Http.readyState === 4) {
     if (Http.status === 200) {
-      console.log('New');
-
     }
         }
       };
@@ -1477,9 +1734,59 @@ export default {
       source: undefined,
       rsource: undefined,
       tsource: undefined,
+      moreBar: false,
+      enableWeather: false,
+      enableDate: false,
+      enableWeb: false,
+      enableMarkmap: false,
+      enableFiles: false,
+      enableStableDiffusion: false
     };
   },
   methods: {
+    switchButton(type) {
+      const Http = new XMLHttpRequest();
+      if (type == "web") {
+        this.enableWeb = !this.enableWeb;
+      } else if (type == "sd") {
+        this.enableStableDiffusion = !this.enableStableDiffusion;
+      } else if (type == "markmap") {
+        this.enableMarkmap = !this.enableMarkmap;
+      } else if (type == "weather") {
+        this.enableWeather = !this.enableWeather;
+      } else if (type == "date") {
+        this.enableDate = !this.enableDate;
+      }
+      const url = process.env.VUE_APP_API+"/api/config?web="+this.enableWeb+"&sd="+this.enableStableDiffusion+"&markmap="+this.enableMarkmap+"&weather="+this.enableWeather+"&date="+this.enableDate;
+      Http.open("POST", url);
+      Http.send();
+      Http.onreadystatechange = (e) => {
+        if (Http.readyState === 4) {
+          if (Http.status === 200) {
+          }
+        }
+      };
+    },
+    sync_config(){
+      const Http = new XMLHttpRequest();
+      const url = process.env.VUE_APP_API+"/api/sync";
+      Http.open("GET", url);
+      Http.send();
+      Http.onreadystatechange = (e) => {
+        if (Http.readyState === 4) {
+          if (Http.status === 200) {
+            var content = Http.responseText
+            var cfgJson = eval("(" + content + ")");
+            //console.log(cfgJson)
+            this.enableWeb = cfgJson['web']
+            this.enableDate = cfgJson['date']
+            this.enableWeather = cfgJson['weather']
+            this.enableMarkmap = cfgJson['markmap']
+            this.enableStableDiffusion = cfgJson['sd']
+          }
+        }
+      };
+    },
     closeSource() {
       var that = this;
       if (that.source) {
@@ -1496,6 +1803,30 @@ export default {
       }
     },
     suitable() {},
+    copy(idx, conv) {
+      var content = conv['speeches'][0];
+      const authentication = () => {
+      if ("clipboard" in navigator) {
+        return new Promise((resolve, reject) => {
+          navigator.permissions.query({ name: "clipboard-read" }).then(
+            (result) => {
+              if (result.state == "granted" || result.state == "prompt") {
+                resolve(true);
+              } else {
+                resolve(false);
+              }
+            },
+            (error) => {
+              reject(error);
+            }
+          );
+        });
+      } else {
+        return Promise.resolve(false);
+      }
+    };
+      navigator.clipboard.writeText(content.trim())
+    },
     handleFileUpload(event) {
       const file = event.target.files[0];
       const formData = new FormData();
@@ -1506,7 +1837,6 @@ export default {
         body: formData
       })
     },
-    
     stopChat() {
       var that = this;
       this.axios
@@ -1542,6 +1872,13 @@ export default {
     showSlideMethod() {
       this.showSlide = true;
       this.$refs.slideNavContainer.appendChild(this.$refs.navEle);
+    },
+    moreBarShow() {
+      this.sync_config();
+      this.moreBar = true;
+    },
+    moreBarClose() {
+      this.moreBar = false;
     },
     changeHeight() {
       var elem = this.$refs.inputChat;
@@ -1614,7 +1951,6 @@ export default {
       this.refreshConversation();
     },
     inputChat(msg) {
-      console.log(msg);
       this.chatMsg = msg;
     },
     countAndConcat(str, substr) {
@@ -1650,7 +1986,6 @@ export default {
         if (Http.readyState === 4) {
           if (Http.status === 200) {
             var content = Http.responseText;
-            console.log(`resp:(${content})`);
             var rconv = that.conversation[that.conversation.length - 1];
             rconv["loading"] = false;
             that.convLoading = false;
@@ -1708,7 +2043,6 @@ export default {
     var source = (this.source = new EventSource(process.env.VUE_APP_API+"/api/chat?prompt=" + encodeURIComponent(chatMsg)));
 
     source.addEventListener("open", function () {
-      console.log("connect");
     });
 
     source.addEventListener("message", function (e) {
@@ -1735,7 +2069,6 @@ export default {
       }
 
       var content = e.data;
-      console.log(`resp:(${content})`);
       if (content.includes("[ENTRY]")) {
         content = content.replaceAll("[ENTRY]", "\n");
       }
@@ -1770,7 +2103,7 @@ export default {
       conv.title = ""
       var that = this;
       const Http = new XMLHttpRequest();
-      const url = "http://127.0.0.1:8003/api/title";
+      const url = process.env.VUE_APP_API+"/api/title";
       Http.open("GET", url);
       Http.send();
       Http.onreadystatechange = (e) => {
@@ -1809,7 +2142,6 @@ export default {
         if (Http.readyState === 4) {
           if (Http.status === 200) {
             var content = Http.responseText;
-            console.log(`resp:(${content})`);
             var rconv = that.conversation[that.conversation.length - 1];
             rconv["loading"] = false;
             that.convLoading = false;
@@ -1885,7 +2217,6 @@ export default {
         if (Http.readyState === 4) {
           if (Http.status === 200) {
             var content = Http.responseText;
-            console.log(`resp:(${content})`);
             var rconv = that.conversation[that.conversation.length - 1];
             rconv["loading"] = false;
             that.convLoading = false;
@@ -1958,143 +2289,9 @@ export default {
 
     let chatDivEle = this.$refs.chatContainer;
     chatDivEle.addEventListener("scroll", this.isScrollAndNotBottom, true);
-
     window.copy = this.vueCopy;
   },
 };
+  import "./assets/style/style.css"
+  import "./assets/style/switch.css";
 </script>
-
-<style lang="scss">
-@import './assets/font/font.css';
-html,
-body {
-  height: 100%;
-  width: 100%;
-}
-
-#app {
-  height: 100%;
-}
-
-.gradient_background {
-  border-radius: 20px ;
-  margin: 5px 5px 5px;
-  box-shadow: 0px 0px 4px #2f2f2f;
-}
-
-.gradient_button {
-  border-radius: 15px ;
-}
-
-.gradient_chat {
-  border-radius: 10px ;
-  box-shadow: 0px 0px 4px #2f2f2f;
-}
-
-.main-title {
-  font-family: "TestSöhne";
-}
-
-.flex_row_c_c {
-  display: flex;
-  align-content: center;
-  flex-direction: row;
-  justify-items: center;
-}
-
-.react-scroll-to-bottom--css-krija-1n7m0yu {
-  height: 100%;
-  overflow-y: auto;
-  width: 100%;
-}
-
-.code_header {
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-}
-
-.prose :where(code):not(:where([class~="not-prose"] *)):before {
-  content: "" !important;
-}
-
-.prose :where(code):not(:where([class~="not-prose"] *)):after {
-  content: "" !important;
-}
-
-#chatRepeat:focus {
-  --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
-    var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-  --tw-ring-shadow: var(--tw-ring-inset) 0 0 0
-    calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-  --tw-ring-offset-width: 0px;
-  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
-    0 0 transparent;
-  box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
-    var(--tw-shadow, 0 0 transparent);
-}
-
-.suitable_selected {
-  --tw-text-opacity: 1 !important;
-  cursor: auto !important;
-}
-
-.load_dot1 {
-  -webkit-animation: blink 1s steps(2, start) infinite;
-  animation: blink 1s steps(2, start) infinite;
-}
-
-.load_dot2 {
-  -webkit-animation: blink 1s steps(3, start) infinite;
-  animation: blink 1s steps(3, start) infinite;
-}
-
-.load_dot3 {
-  -webkit-animation: blink 1s steps(4, start) infinite;
-  animation: blink 1s steps(4, start) infinite;
-}
-
-#app .markdown h1 {
-  margin-bottom: 0rem;
-  margin-top: 0rem;
-}
-
-#app .markdown h2 {
-  margin-bottom: 0rem;
-  margin-top: 0rem;
-}
-
-#app .markdown h3 {
-  margin-bottom: 0rem;
-  margin-top: 0rem;
-}
-
-#app .markdown h4 {
-  margin-bottom: 0rem;
-  margin-top: 0rem;
-}
-
-#app .markdown h5 {
-  margin-bottom: 0rem;
-  margin-top: 0rem;
-}
-
-#app .markdown h6 {
-  margin-bottom: 0rem;
-  margin-top: 0rem;
-}
-
-@media (max-width: 640px) {
-  #app .none {
-    display: none;
-  }
-}
-
-.w-180px {
-  width: 180px;
-}
-
-.prose-r {
-  font-size: 1rem;
-  line-height: 1.75;
-}
-</style>
