@@ -1,0 +1,129 @@
+{
+ "API_host": "http://127.0.0.1:8003",
+ "plugins": {
+  "count": 6,
+  "0": {
+   "name": "weather",
+   "enable": false,
+   "description": "获取实时、明日天气"
+  },
+  "1": {
+   "name": "date",
+   "enable": false,
+   "description": "获取当前阴历、阳历日期"
+  },
+  "2": {
+   "name": "web",
+   "enable": false,
+   "description": "搜索网页"
+  },
+  "3": {
+   "name": "markmap",
+   "enable": false,
+   "description": "生成思维导图"
+  },
+  "4": {
+   "name": "files",
+   "enable": true,
+   "description": "上传文件"
+  },
+  "5": {
+   "name": "SD",
+   "enable": false,
+   "description": "Stable Diffusion"
+  }
+ },
+ "basic": {
+  "port": 8000,
+  "host": "http://127.0.0.1"
+ },
+ "weather": {
+  "trigger_words": [
+   "天气",
+   "太阳",
+   "雨"
+  ],
+  "weather_key": "1381a2eb2e934f7ab288eb401787094d",
+  "preferred_location": "上海"
+ },
+ "date": {
+  "date_trigger_words": [
+   "日期",
+   "日历",
+   "阴历",
+   "农历",
+   "日子",
+   "几点",
+   "时间",
+   "时候",
+   "什么点",
+   "节气",
+   "节日",
+   "几月",
+   "几号"
+  ],
+  "zh_date_trigger_words": [
+   "农历",
+   "中国日历",
+   "节气",
+   "节日",
+   "春节"
+  ]
+ },
+ "SD": {
+  "port": 7861,
+  "host": "http://127.0.0.1",
+  "steps": 5
+ },
+ "web": {
+  "trigger_words": [
+   "什么",
+   "怎么",
+   "是谁",
+   "谁是",
+   "?",
+   "？",
+   "网页",
+   "搜索",
+   "联网"
+  ],
+  "ignore_url": [
+   "google.com",
+   "twitter.c3om",
+   "bit.ly",
+   "youtube.com"
+  ],
+  "git_token": "",
+  "web_max_length": 250,
+  "local": [
+   "知乎专栏",
+   "知乎回复",
+   "百科",
+   "微信公众号",
+   "新闻",
+   "B站专栏",
+   "CSDN",
+   "百度知道",
+   "GitHub",
+   "fandom",
+   "All(Preview)"
+  ],
+  "feature": [
+   "知乎专栏",
+   "知乎回复",
+   "百度知道",
+   "新闻",
+   "fandom"
+  ]
+ },
+ "markmap": {
+  "trigger_words": [
+   "思维导图",
+   "脑图"
+  ],
+  "alias": "markmap"
+ },
+ "files": {
+  "files_max_line": 10
+ }
+}

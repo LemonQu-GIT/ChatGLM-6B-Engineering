@@ -23,9 +23,11 @@ pnpm-debug.log*
 
 package-lock.json
 yarn.lock
-
+cache/
 .history/
 __pycache__/
 cache/
-/src/assets/files
+
 latest.log
+/plugins/uploads
+/plugins/markdown_temp.md

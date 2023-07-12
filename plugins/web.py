@@ -1,89 +1,8 @@
-import json, requests, base64, io, re, time, datetime, os, sys
+import json, requests, re, time
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from PIL import Image, PngImagePlugin
-from clip_interrogator import Config, Interrogator
-
-def get_suffix(str):
-	suffix = str.split(".")[1]
-	return "."+suffix
-
-def get_config():
-	with open("config.json", encoding='utf-8') as f:
-		return json.load(f)
-
-def if_trigger_web(word):
-	triggers = get_config()['Web']['trigger_words']
-	for trigger in triggers:
-		if trigger in word:
-			return True
-	else:
-		return False
-
-def if_trigger_additional_info(word, methods):
-	triggers = get_config()['additional_trigger_info'][methods]
-	for trigger in triggers:
-		if trigger in word:
-			return True
-	else:
-		return False
-
-def weather_search_city(city):
-	key = get_config()['Web']['weather_key']
-	url = f"https://geoapi.qweather.com/v2/city/lookup?location={city}&key={key}"
-	response = requests.get(url)
-	response = json.loads(response.text)
-	city_id = response['location'][0]['id']
-	return int(city_id)
-
-def weather_get(id):
-	key = get_config()['Web']['weather_key']
-	url = f"https://devapi.qweather.com/v7/weather/now?location={id}&key={key}"
-	response = requests.get(url)
-	response = json.loads(response.text)
-	return response
-
-def weather_get_tmr(id):
-	key = get_config()['Web']['weather_key']
-	url = f"https://devapi.qweather.com/v7/weather/3d?location={id}&key={key}"
-	response = requests.get(url)
-	response = json.loads(response.text)
-	return response['daily'][1]
-
-def weather_search_local(city):
-	import numpy as np
-	data = np.loadtxt("./lib_files/Weather_Location_Name.csv", delimiter=",", dtype=str, encoding='utf-8')
-	for cities in data:
-		if cities in city:
-			return cities
-	else:
-		return get_config()['Web']['preferred_location']
-
-global ci
-#ci = Interrogator(Config(clip_model_name=get_config().get('CLIP').get('model')))
-def clip_image(filename):
-	global ci
-	image = Image.open(filename).convert('RGB')
-	return ci.interrogate_classic(image) # type: ignore
-
-def clip_trans(word):
-	url = "http://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule&smartresult=ugc&sessionFrom=null"
-	key = {
-		"type": "AUTO",
-		"i": word,
-		"doctype": "json",
-		"version": "2.1",
-		"keyfrom": "fanyi.web",
-		"ue": "UTF-8",
-		"action": "FY_BY_CLICKBUTTON",
-		"typoResult": "true",
-	}
-	response = requests.post(url, data=key)
-	if response.status_code == 200:
-		list_trans = response.text
-		result = json.loads(list_trans)
-		return result["translateResult"][0][0]["tgt"]
+from plugins.utils import *
 
 def get_basic_url(url: str):
 	try:
@@ -92,27 +11,12 @@ def get_basic_url(url: str):
 		return method[0]
 	except:
 		return ''
- 
+
+
 def generate_reference(reference: list):
 	response = "\n了解更多信息：\n "
 	for urls in reference:
 		response += f"> * [{get_basic_url(urls)}]({urls})\n"
-	return response
-
-def preview_text(text: str, type: str):
-	column = text.count("\n")+1
-	response = ""
-	files_max_line = get_config()['additional_trigger_info']['files_max_line']
-	if column > files_max_line:
-		column_list = text.split('\n')
-		for i in range(round(files_max_line/2)):
-			response += column_list[i] + "\n"
-		response += "...\n"
-		for i in range(len(column_list)-round(files_max_line/2)+1,len(column_list)):
-			response += column_list[i] + "\n"
-	else:
-		response = text
-	response = f"```{type}\n{response}\n```"
 	return response
 
 def filter_tags(htmlstr):
@@ -132,14 +36,14 @@ def filter_tags(htmlstr):
 	s=blank_line.sub('\n',s)
 	s=replaceCharEntity(s)
 	return s
- 
+
 def replaceCharEntity(htmlstr):
 	CHAR_ENTITIES={'nbsp':' ','160':' ',
 				'lt':'<','60':'<',
 				'gt':'>','62':'>',
 				'amp':'&','38':'&',
 				'quot':'"','34':'"',}
- 
+
 	re_charEntity=re.compile(r'&#?(?P<name>\w+);')
 	sz=re_charEntity.search(htmlstr)
 	while sz:
@@ -151,90 +55,37 @@ def replaceCharEntity(htmlstr):
 			htmlstr=re_charEntity.sub('',htmlstr,1)
 			sz=re_charEntity.search(htmlstr)
 	return htmlstr
- 
+
 def repalce(s,re_exp,repl_string):
 	return re_exp.sub(repl_string,s)
 
-def search_not(url):
-	options = webdriver.ChromeOptions()
-	options.add_argument('headless')
-	options.add_experimental_option('excludeSwitches', ['enable-logging'])
-	driver = webdriver.Chrome(options=options)
-	driver.set_page_load_timeout(10)
-	driver.set_script_timeout(10)
+def search_plain(url):
 	try:
-		driver.get(url)
-	except Exception:
-		driver.execute_script('window.stop()')
-	for i in range(0, 20000, 350):
-		time.sleep(0.1)
-		driver.execute_script('window.scrollTo(0, %s)' % i)
-	html = driver.execute_script("return document.documentElement.outerHTML")
-	html = filter_tags(html).replace('\n','').replace('\r','').replace('\t','')
-	return repr(html)
-
-def chatglm_json(prompt, history):
-	url = str(get_config().get('basic').get('host'))+":"+str(get_config().get('basic').get('port'))+ "/default"
-	payload = {
-		"prompt": prompt,
-		"history": history
-	}
-	response = requests.post(url, json=payload)
-	json_resp_raw = response.json()
-	json_resp_raw_list = json.dumps(json_resp_raw)
-	return json_resp_raw_list
-
+		options = webdriver.ChromeOptions()
+		options.add_argument('headless')
+		options.add_experimental_option('excludeSwitches', ['enable-logging'])
+		driver = webdriver.Chrome(options=options)
+		driver.set_page_load_timeout(10)
+		driver.set_script_timeout(10)
+		try:
+			driver.get(url)
+		except Exception:
+			driver.execute_script('window.stop()')
+		for i in range(0, 20000, 350):
+			time.sleep(0.02)
+			driver.execute_script('window.scrollTo(0, %s)' % i)
+		html = driver.execute_script("return document.documentElement.outerHTML")
+		html = filter_tags(html).replace('\n','').replace('\r','').replace('\t','')
+		return repr(html)
+	except:
+		log(f"Error fetching url: {url}", 'ERROR')
+		return "None"
+  
 def test_if_url_ignore(test_url):
-	for url in get_config().get('Web').get('ignore_url'):
+	for url in get_config().get("web").get('ignore_url'):
 		if url in test_url:
 			return True
 	return False
-
-def test_if_zhcn(string):
-	for ch in string:
-		if u'\u4e00' <= ch <= u'\u9fff':
-			return True
-	return False
-
-def translate(word):
-	if test_if_zhcn(word):
-		url = 'http://fanyi.youdao.com/translate?smartresult=dict&smartresult=rule&smartresult=ugc&sessionFrom=null'
-		key = {
-			'type': "AUTO",
-			'i': word,
-			"doctype": "json",
-			"version": "2.1",
-			"keyfrom": "fanyi.web",
-			"ue": "UTF-8",
-			"action": "FY_BY_CLICKBUTTON",
-			"typoResult": "true"
-		}
-		response = requests.post(url, data=key)
-		if response.status_code == 200:
-			list_trans = response.text
-			result = json.loads(list_trans)
-			return result['translateResult'][0][0]['tgt']
-	else:
-		return word
-
-def stable_diffusion(Pprompt,Nprompt, steps):
-	url = str(get_config().get('SD').get('host'))+":"+str(get_config().get('SD').get('port'))
-	payload = {
-		"prompt": Pprompt,
-		"steps": steps,
-		"negative_prompt": Nprompt
-	}
-	response = requests.post(url=f'{url}/sdapi/v1/txt2img', json=payload)
-	r = response.json()
-	for i in r['images']:
-		image = Image.open(io.BytesIO(base64.b64decode(i.split(",",1)[0])))
-		png_payload = {
-			"image": "data:image/png;base64," + i
-		}
-		response2 = requests.post(url=f'{url}/sdapi/v1/png-info', json=png_payload)
-		pnginfo = PngImagePlugin.PngInfo()
-		pnginfo.add_text("parameters", response2.json().get("info"))
-		image.save('./src/assets/imgs/stable_diffusion.png', pnginfo=pnginfo)
 
 def ext_zhihu(url):
 	if "/answer" in url:
@@ -256,24 +107,6 @@ def redirect_url(url):
 		real_url = re.findall("URL='(.*?)'", r.text)[0]
 	return real_url
 
-def log(event:str):
-	back_frame = sys._getframe().f_back
-	if back_frame is not None:
-		back_filename = os.path.basename(back_frame.f_code.co_filename)
-		back_funcname = back_frame.f_code.co_name
-		back_lineno = back_frame.f_lineno
-	else:
-		back_filename = "Unknown"
-		back_funcname = "Unknown"
-		back_lineno = "Unknown"
-	now = datetime.datetime.now()
-	time = now.strftime("%Y-%m-%d %H:%M:%S")
-	logger = f"[{time}] [{back_filename}:{back_lineno}]: <{back_funcname}()> {event}"
-	print(logger)
-	with open('latest.log','a', encoding='utf-8') as f:
-		f.write(f'{logger}\n')
-
-
 def search_web(keyword):
 	options = webdriver.ChromeOptions()
 	options.add_argument('headless')
@@ -281,7 +114,7 @@ def search_web(keyword):
 	driver = webdriver.Chrome(options=options)
 	driver.get(quote("https://cn.bing.com/search?q="+str(keyword),safe='/:?=.'))
 	for i in range(0, 20000, 350):
-		time.sleep(0.1)
+		time.sleep(0.02)
 		driver.execute_script('window.scrollTo(0, %s)' % i)
 	html = driver.execute_script("return document.documentElement.outerHTML")
 	driver.close()
@@ -335,7 +168,7 @@ def search_baidu_zhidao(url):
 		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44",
 	}
 	r = requests.get(url, headers=headers)
-	r.encoding = 'GBK'
+	r.encoding = 'utf-8'
 	html = str(r.text)
 	soup = BeautifulSoup(html, 'html.parser')
 	item_list = soup.find(class_='rich-content-container rich-text-')
@@ -442,8 +275,8 @@ def search_csdn(url):
 	return item_title
 
 def search_github(keyword):
-	token = get_config().get('Web').get('git_token')
-	if not token == None:
+	token = get_config().get("web").get('git_token')
+	if not token == "":
 		headers={"Authorization":"token "+ str(token)}
 	else:
 		headers={}
@@ -470,64 +303,125 @@ def search_github(keyword):
 	except:
 		return []
 
+def search_fandom_wiki(url):
+	try:
+		headers = {
+			"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44",
+		}
+		r = requests.get(url, headers=headers, timeout=30)
+		html = r.text
+		soup = BeautifulSoup(html, 'html.parser')
+		item_list = str(soup.find('div', id='content'))
+		ig_script_list = item_list.split('<script')
+		ig_script = ' '+ig_script_list[1].split('</script>')[0].strip()
+		ig_script = item_list.replace(ig_script, '>')
+		item_title = re.sub(r'(<[^>]+>|\s)','', ig_script)
+		return item_title
+	except:
+		return ''
+
 def search_main(item, feature: list):
-	web_list = search_web(item)
-	log(web_list)
-	return_list = []
-	flist = []
-	if '百科' in feature:
-		baike = search_baike(str(item))
-		if baike is not None:
-			reference_list = baike[0]
-			content_list = baike[1]
-			if reference_list is not None:
-				for references in reference_list:
-					flist.append(references)
-			if content_list is not None:
-				for contents in content_list:
-					return_list.append(contents)
-	if 'GitHub' in feature:
-		githubresp = search_github(item)
-		if not githubresp == "":
-			try:
-				ans = githubresp[1]
-				return_list.append(ans[0:int(get_config().get('Web').get('web_max_length'))])
-				flist.append("https://github.com/"+githubresp[0])
-			except:
-				"bruh"
-	for items in web_list:
-		if "zhihu.com/question/" in items[1] and '知乎回复' in feature:
-			return_list.append(str(search_zhihu_que(ext_zhihu(items[1])))[0:int(get_config().get('Web').get('web_max_length'))])
-			flist.append(items[1])
-		if "baike.sogou.com" in items[1] and '百科' in feature:
-			return_list.append(str(search_baike(items[1]))[0:int(get_config().get('Web').get('web_max_length'))])
-			flist.append(items[1])
-		if "mp.weixin.qq.com" in items[1] and '微信公众号' in feature:
-			return_list.append(str(search_wx(items[1]))[0:int(get_config().get('Web').get('web_max_length'))])
-			flist.append(items[1])
-		if "zhuanlan.zhihu.com" in items[1] and '知乎专栏' in feature:
-			return_list.append(str(search_zhihu_zhuanlan(items[1]))[0:int(get_config().get('Web').get('web_max_length'))])
-			flist.append(items[1])
-		if "163.com/dy/article/" in items[1] and '新闻' in feature:
-			return_list.append(str(search_news_163(items[1]))[0:int(get_config().get('Web').get('web_max_length'))])
-			flist.append(items[1])
-		if "sohu.com/a/" in items[1] and '新闻' in feature:
-			return_list.append(str(search_news_sohu(items[1]))[0:int(get_config().get('Web').get('web_max_length'))])
-			flist.append(items[1])
-		if "bilibili.com/read/" in items[1] and 'B站专栏' in feature:
-			return_list.append(str(search_bilibili(items[1]))[0:int(get_config().get('Web').get('web_max_length'))])	
-			flist.append(items[1])
-		if "blog.csdn.net" in items[1] and 'CSDN' in feature:
-			return_list.append(str(search_csdn(items[1]))[0:int(get_config().get('Web').get('web_max_length'))])
-			flist.append(items[1])
-		if "zhidao.baidu.com" in items[1] and '百度知道' in feature:
-			return_list.append(str(search_baidu_zhidao(items[1]))[0:int(get_config().get('Web').get('web_max_length'))])
-			flist.append(items[1])
-		if 'All(Preview)' in feature:
-			if not 'zhihu.com/question/' or not 'baike.sogou.com' or not 'mp.weixin.qq.com' or not 'zhuanlan.zhihu.com' or not '163.com/dy/article/' or not 'sohu.com/a/' or not 'bilibili.com/read/' or not 'blog.csdn.net' in items[1]:
-				if not test_if_url_ignore(items[1]):
-					ans = search_not(items[1])
-					if ans is not None:
-						return_list.append(ans)
-						flist.append(items[1][0:int(get_config().get('Web').get('web_max_length'))])
-	return [flist,return_list]
+	if not feature == []:
+		web_list = search_web(item)
+		log(str(web_list), 'INFO')
+		return_content = []
+		reference_list = []
+		if '百科' in feature:
+			baike = search_baike(str(item))
+			log(str(baike), "INFO")
+			if baike is not None:
+				reference_list = baike[0]
+				content_list = baike[1]
+				if reference_list is not None:
+					for references in reference_list:
+						reference_list.append(references)
+				if content_list is not None:
+					for contents in content_list:
+						return_content.append(contents)
+		if 'GitHub' in feature:
+			githubresp = search_github(item)
+			if not githubresp == "":
+				try:
+					ans = githubresp[1]
+					return_content.append(ans[0:int(get_config().get("web").get('web_max_length'))])
+					reference_list.append("https://github.com/"+githubresp[0])
+				except:
+					pass
+		for items in web_list:
+			log(f'Processing on {items}', 'EVENT')
+			if "zhihu.com/question/" in items[1] and '知乎回复' in feature:
+				return_content.append(str(search_zhihu_que(ext_zhihu(items[1])))[0:int(get_config().get("web").get('web_max_length'))])
+				reference_list.append(items[1])
+			if "baike.sogou.com" in items[1] and '百科' in feature:
+				return_content.append(str(search_baike(items[1]))[0:int(get_config().get("web").get('web_max_length'))])
+				reference_list.append(items[1])
+			if "mp.weixin.qq.com" in items[1] and '微信公众号' in feature:
+				return_content.append(str(search_wx(items[1]))[0:int(get_config().get("web").get('web_max_length'))])
+				reference_list.append(items[1])
+			if "zhuanlan.zhihu.com" in items[1] and '知乎专栏' in feature:
+				return_content.append(str(search_zhihu_zhuanlan(items[1]))[0:int(get_config().get("web").get('web_max_length'))])
+				reference_list.append(items[1])
+			if "163.com/dy/article/" in items[1] and '新闻' in feature:
+				return_content.append(str(search_news_163(items[1]))[0:int(get_config().get("web").get('web_max_length'))])
+				reference_list.append(items[1])
+			if "sohu.com/a/" in items[1] and '新闻' in feature:
+				return_content.append(str(search_news_sohu(items[1]))[0:int(get_config().get("web").get('web_max_length'))])
+				reference_list.append(items[1])
+			if "bilibili.com/read/" in items[1] and 'B站专栏' in feature:
+				return_content.append(str(search_bilibili(items[1]))[0:int(get_config().get("web").get('web_max_length'))])
+				reference_list.append(items[1])
+			if "blog.csdn.net" in items[1] and 'CSDN' in feature:
+				return_content.append(str(search_csdn(items[1]))[0:int(get_config().get("web").get('web_max_length'))])
+				reference_list.append(items[1])
+			if "zhidao.baidu.com" in items[1] and '百度知道' in feature:
+				return_content.append(str(search_baidu_zhidao(items[1]))[0:int(get_config().get("web").get('web_max_length'))])
+				reference_list.append(items[1])
+			if "fandom.com" in items[1] and "/wiki/" in items[1] and 'fandom' in feature:
+				return_content.append(str(search_fandom_wiki(items[1]))[0:int(get_config().get("web").get('web_max_length'))])
+				reference_list.append(items[1])
+			if 'All(Preview)' in feature:
+				if not 'zhihu.com/question/' or not 'baike.sogou.com' or not 'mp.weixin.qq.com' or not 'zhuanlan.zhihu.com' or not '163.com/dy/article/' or not 'sohu.com/a/' or not 'bilibili.com/read/' or not 'blog.csdn.net' in items[1]:
+					if not test_if_url_ignore(items[1]):
+						ans = search_plain(items[1])
+						if ans is not None:
+							return_content.append(ans)
+							reference_list.append(items[1][0:int(get_config().get("web").get('web_max_length'))])
+			
+		return [reference_list,return_content]
+
+def match_url(string:str):
+	reg = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+	return re.findall(reg, string)
+
+
+def if_trigger_web(word):
+	triggers = get_config()['web']['trigger_words']
+	for trigger in triggers:
+		if trigger in word:
+			return True
+	else:
+		return False
+
+def run(prompt: str):
+	if if_trigger_web(prompt):
+		feature = get_config()['web']['feature']
+		references = []
+		try_match_url = match_url(prompt)
+		web_info = ''
+		if not try_match_url == []:
+			for urls in try_match_url:
+				log(f"Finding url in prompt, url: {urls}", "EVENT")
+				plain_text = search_plain(urls)
+				log(f"URL content: {repr(plain_text)}", "INFO")
+				web_info += f"已知{urls}上的文字有：{repr(plain_text)}"
+				references += [urls]
+		else:
+			log(f'Begin searching job. Feature: {feature}', "EVENT")
+			search_resp = search_main(str(prompt), feature)
+			web_info = search_resp[1] # type:ignore
+			references += search_resp[0] # type:ignore
+		if len(str(web_info)) > 2000:
+			web_info = web_info[0:2000]
+		log(f'Search finished. Web search response: {repr(web_info)}', "INFO")
+		preview_reference = generate_reference(references)
+		return {"add": f"我在网络上查询到了一些网络上的参考信息“{web_info}”", "prefix": "", "suffix": f"\n{preview_reference}"}

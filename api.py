@@ -17,27 +17,28 @@ def torch_gc():
 
 app = FastAPI()
 
-async def predict(input, max_length, top_p, temperature, history, additional):
+async def predict(prompt, max_length, top_p, temperature, history, suffix, prefix):
 	global model, tokenizer
 	given_response = ""
-	for response, history in model.stream_chat(tokenizer, input, history, max_length=max_length, top_p=top_p, temperature=temperature):
+	for response, history in model.stream_chat(tokenizer, prompt, history, max_length=max_length, top_p=top_p, temperature=temperature):
+		response = prefix + response
 		given_response = response
 		yield response
-	yield given_response + additional
+	yield given_response + suffix
 	torch_gc()
 
 class ConversationsParams(BaseModel):
-	input: str
+	prompt: str
 	max_length: Optional[int] = 2048
 	top_p: Optional[float] = 0.7
 	temperature: Optional[float] = 0.95
-	additional: Optional[str] = ""
+	suffix: Optional[str] = ""
+	prefix: Optional[str] = ""
 	history: list
 
 @app.post('/stream')
 async def conversations(params: ConversationsParams):
-	history = list(map(tuple, params.history))
-	predictGenerator = predict(params.input, params.max_length, params.top_p, params.temperature, params.history, params.additional)
+	predictGenerator = predict(params.prompt, params.max_length, params.top_p, params.temperature, params.history, params.suffix, params.prefix)
 	now = datetime.datetime.now()
 	time = now.strftime("%Y-%m-%d %H:%M:%S")
 	log = "[" + time + "] " + '", params:"' + repr(params) + '"'
@@ -74,10 +75,21 @@ async def create_item(request: Request):
 	torch_gc()
 	return answer
 
+@app.post("/ping")
+async def ping():
+	return "200"
+
+@app.post("/forceclearmemory")
+async def clear_memory():
+	torch_gc()
+	return "200"
+
 if __name__ == '__main__':
-    #tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True)
-	#model = AutoModel.from_pretrained("THUDM/chatglm-6b", trust_remote_code=True).quantize(4).half().cuda()
-	tokenizer = AutoTokenizer.from_pretrained(r"E:\huggingface\models--THUDM--chatglm-6b\snapshots\a10da4c68b5d616030d3531fc37a13bb44ea814d", trust_remote_code=True)
-	model = AutoModel.from_pretrained(r"E:\huggingface\models--THUDM--chatglm-6b\snapshots\a10da4c68b5d616030d3531fc37a13bb44ea814d", trust_remote_code=True).quantize(4).half().cuda()
+	#tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True)
+	#model = AutoModel.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True, device='cuda').quantize(4).half().cuda()
+	#tokenizer = AutoTokenizer.from_pretrained(r"E:\huggingface\models--THUDM--chatglm-6b\snapshots\a10da4c68b5d616030d3531fc37a13bb44ea814d", trust_remote_code=True)
+	#model = AutoModel.from_pretrained(r"E:\huggingface\models--THUDM--chatglm-6b\snapshots\a10da4c68b5d616030d3531fc37a13bb44ea814d", trust_remote_code=True).quantize(4).half().cuda()
+	tokenizer = AutoTokenizer.from_pretrained(r"E:\model\chatglm2-6b", trust_remote_code=True)
+	model = AutoModel.from_pretrained(r"E:\model\chatglm2-6b", trust_remote_code=True).quantize(4).half().cuda()
 	model.eval()
 	uvicorn.run(app, host='0.0.0.0', port=8000, workers=1)
