@@ -39,3 +39,4 @@ transformers
 urllib3
 uvicorn
 websockets
+zhdate
