@@ -1,13 +1,13 @@
 # ChatGLM-6B-Engineering
 
-(Back End)
+(Back End) 后端
+
+前端的源码在：https://github.com/LemonQu-GIT/ChatGLM-6B-Engineering/tree/WebUI
 
 ## 介绍
 
 本项目参考于
 
-* https://gitee.com/MIEAPP/chatai-vue
-* https://github.com/LemonQu-GIT/ChatGLM-6B-Engineering
 * https://github.com/THUDM/ChatGLM-6B
 * https://github.com/THUDM/ChatGLM2-6B
 * https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/35b1775b32a07f1b7c9dccad61f7aa77027a00fa
@@ -31,6 +31,8 @@ UI 仿 [ChatGPT](https://chat.openai.com/chat) 并使用流式输出以实现逐
 * [Markmap](https://markmap.js.org/) 生成思维导图
 
 ## 部署
+
+本项目的推荐运行环境为 Python v3.9.16  node.js v14.21.3 
 
 * ChatGLM-6B
 
@@ -133,3 +135,10 @@ if enable_demo:
                 log(f"demo plugin finished", "EVENT")
 ```
 
+## 联系方式
+
+QQ: 173887664
+
+Email: LemonQu@outlook.com
+
+将在之后创建 QQ 交流群并逐渐开放 https://chat.lemonquapi.tk 的对话示例
