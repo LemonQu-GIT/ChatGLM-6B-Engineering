@@ -1,9 +1,10 @@
 @font-face {
-  font-family: "TestSöhne";
-  src: url("./font/TestSöhne.otf");
+  font-family: "Basique";
+  src: url("./font/Basique.ttf");
   font-weight: normal;
   font-style: normal;
 }
+
 html,
 body {
   height: 100%;
@@ -15,7 +16,8 @@ body {
 }
 
 .main-title {
-  font-family: "TestSöhne";
+  font-family: "Basique";
+  letter-spacing: 1px;
 }
 
 .flex_row_c_c {
