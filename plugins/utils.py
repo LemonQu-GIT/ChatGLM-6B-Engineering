@@ -136,7 +136,6 @@ def validate_config():
 					log(f'Using {response.elapsed.total_seconds()} seconds to get https://cn.bing.com', "INFO")
 				except:
 					log('Error while browsering Internet. Functionality might be limited.', "ERROR")
-					os._exit(0)
 				log("Validation Passed.", "INFO")
 			except:
 				log('Failed to load config. Broken content.', "CRITICAL")
