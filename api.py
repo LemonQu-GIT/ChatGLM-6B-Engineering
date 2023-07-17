@@ -1,3 +1,4 @@
+import argparse
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from typing import Optional
@@ -5,13 +6,18 @@ from sse_starlette.sse import EventSourceResponse
 from transformers import AutoTokenizer, AutoModel
 import uvicorn, json, torch, datetime
 
-DEVICE = "cuda"
-DEVICE_ID = "0"
-CUDA_DEVICE = f"{DEVICE}:{DEVICE_ID}" if DEVICE_ID else DEVICE
+settings = {
+	"device": "cuda",
+	"device_id": "0",
+}
 
 def torch_gc():
+	device = torch.device(f'{settings["device"]}:{settings["device_id"]}' if settings["device_id"] else settings["device"])
+	if device == "cpu":
+		return
+
 	if torch.cuda.is_available():
-		with torch.cuda.device(CUDA_DEVICE):
+		with torch.cuda.device(device):
 			torch.cuda.empty_cache()
 			torch.cuda.ipc_collect()
 
@@ -85,11 +91,41 @@ async def clear_memory():
 	return "200"
 
 if __name__ == '__main__':
-	#tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True)
-	#model = AutoModel.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True, device='cuda').quantize(4).half().cuda()
-	#tokenizer = AutoTokenizer.from_pretrained(r"E:\huggingface\models--THUDM--chatglm-6b\snapshots\a10da4c68b5d616030d3531fc37a13bb44ea814d", trust_remote_code=True)
-	#model = AutoModel.from_pretrained(r"E:\huggingface\models--THUDM--chatglm-6b\snapshots\a10da4c68b5d616030d3531fc37a13bb44ea814d", trust_remote_code=True).quantize(4).half().cuda()
-	tokenizer = AutoTokenizer.from_pretrained(r"E:\model\chatglm2-6b", trust_remote_code=True)
-	model = AutoModel.from_pretrained(r"E:\model\chatglm2-6b", trust_remote_code=True).quantize(4).half().cuda()
+	# parse arguments
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--tokenizer', type=str)
+	parser.add_argument('--model', type=str)
+	parser.add_argument('--device', type=str, default='cuda')
+	parser.add_argument('--device_id', type=str, default='0')
+	parser.add_argument('--host', type=str, default='localhost')
+	parser.add_argument('--port', type=int, default=8000)
+	parser.add_argument('--workers', type=int, default=1)
+	args = parser.parse_args()
+ 
+	# check arguments
+	if args.device not in ['cuda', 'cpu']:
+		raise ValueError('Invalid device argument')
+
+	if args.device == 'cuda':
+		if args.device_id not in [str(i) for i in range(torch.cuda.device_count())]:
+			raise ValueError('Invalid device_id argument')
+
+	if args.model == '':
+		raise ValueError('Invalid model argument')
+
+	if args.tokenizer == '':
+		raise ValueError('Invalid tokenizer argument')
+
+	# set settings
+	settings['device'] = args.device
+	settings['device_id'] = args.device_id
+
+	# load model
+	tokenizer = AutoTokenizer.from_pretrained(args.tokenizer, trust_remote_code=True)
+	model = AutoModel.from_pretrained(args.model, trust_remote_code=True)
+	model = model.quantize(4)
+	model = model.half()
+	model = model.cuda()
 	model.eval()
-	uvicorn.run(app, host='0.0.0.0', port=8000, workers=1)
+	print("Starting API server...")
+	uvicorn.run(app, host=args.host, port=args.port, workers=args.workers)
