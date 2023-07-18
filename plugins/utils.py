@@ -48,7 +48,6 @@ def log(event:str, type:str):
 		f.write(f'{logger}\n')
 
 def change_cfg(weather: bool, date: bool, web: bool, markmap: bool, files: bool, sd: bool):
-	plugin_list = plugin_status()
 	with open('./plugins/config.json', 'r', encoding='utf-8') as f:
 		result = f.read()
 	results=json.loads(result)
