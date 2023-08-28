@@ -2,85 +2,86 @@
 
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
-(Back End) 后端
+Back End
 
 <center>🌐 <a href="README.md">Chinese Version</a> | <a href="README_en_us.md">English Version</a></center>
 
-## 介绍
+## Introduction
 
-此项目参考于：
+hanks for:
 
 * https://github.com/THUDM/ChatGLM-6B
 * https://github.com/THUDM/ChatGLM2-6B
 * https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/35b1775b32a07f1b7c9dccad61f7aa77027a00fa
 * https://github.com/markmap/markmap
 
-并进行多许修改以适配 ChatGLM-6B
+And also add lots of code to adapt ChatGLM-6B.
 
-UI 仿 [ChatGPT](https://chat.openai.com/chat) 并使用流式输出以实现逐字回答的动画效果
+The UI copies [ChatGPT](https://chat.openai.com/chat)'s UI and use stream chat for word for word animation.
 
-`api.py` 参考 [此 PR](https://github.com/THUDM/ChatGLM-6B/pull/573) 以实现流式传输
+The `api.py` copies [this PR](https://github.com/THUDM/ChatGLM-6B/pull/573) to implement stream chat.
 
-正在设想加入 langchain 以适配在网络搜索后存入本地知识库以供下次使用
+Deciding to add langchain to this project for better experience.
 
-## 示例
+## Example
 
-### 功能
+### Functions
 
-* 上下文对话（默认）
-* 网络搜索（可以去了解 [WebGLM](https://github.com/THUDM/WebGLM)）
-* Stable Diffusion (已弃用)
-* [Markmap](https://markmap.js.org/) 生成思维导图
+* Chat with context（Default）
+* Web search（You can also look at  [WebGLM](https://github.com/THUDM/WebGLM)）
+* Stable Diffusion (Deprecated)
+* [Markmap](https://markmap.js.org/) to generate mind map
 
-## 部署
+## Deploy
 
-本项目的推荐运行环境为 Python v3.9.16  (node.js v14.21.3)
+Recommended Environment: Python v3.9.16  (node.js v14.21.3)
 
-请先成功部署下列 Repo：
+Please deploy the following repositories:
 
 * ChatGLM-6B
 
   > https://github.com/THUDM/ChatGLM-6B
   >
-* Stable Diffusion (已弃用)
+* Stable Diffusion (Deprecated) (Optional)
 
   > https://github.com/AUTOMATIC1111/stable-diffusion-webui/tree/35b1775b32a07f1b7c9dccad61f7aa77027a00fa
   >
 * ChatGLM-6B-Engineering
 
   > https://github.com/LemonQu-GIT/ChatGLM-6B-Engineering
-  >
 
-1. 安装依赖
+Instructions for this repo:
+
+1. Install requirements
 
    ```shell
    pip install -r requirements.txt
    ```
 
-2. 运行 ChatGLM-6B API (chat api) (Port 8000)
+2. Run ChatGLM-6B API (chat api) (Port 8000)
 
    ```shell
    python api.py
    ```
 
-3. 运行 ChatGLM-6B API (back end) (Port 8003)
+3. Run ChatGLM-6B API (back end) (Port 8003)
 
    ```shell
    python front_end.py
    ```
 
-4. 安装 [markmap.js](https://github.com/markmap/markmap)
+4. Install [markmap.js](https://github.com/markmap/markmap)
 
    ```shell
    yarn global add markmap-cli
    ```
 
-5. 运行 Gradio Demo
+5. Run Gradio Demo
 
    ```shell
    python gradio_demo.py
 
-6. (可选) 运行 npm (front end) (Port 8080) v14.21.3 （前端的源码在：https://github.com/LemonQu-GIT/ChatGLM-6B-Engineering/tree/WebUI）
+6. (Optional) Run npm (front end) (Port 8080) v14.21.3 （Front end code at: https://github.com/LemonQu-GIT/ChatGLM-6B-Engineering/tree/WebUI）
 
  ```shell
    npm install -g yarn
@@ -90,15 +91,15 @@ UI 仿 [ChatGPT](https://chat.openai.com/chat) 并使用流式输出以实现逐
    yarn dev
  ```
 
-## 开发
+## Development
 
-加入了插件的功能，用户可以根据自己的需要自行开发插件
+Added plugins, allows users to develop plugins according to their own needs
 
-插件的原理如下：
+The principle of running the plugins:
 
-![](./img/plugin_process.svg "plugin 加载流程")
+![](./img/plugin_process_en.svg "plugin principle")
 
-### 模板
+### Template
 
 \>> ./plugins/demo.py (new)
 
@@ -143,12 +144,8 @@ if enable_demo:
                 log(f"demo plugin finished", "EVENT")
 ```
 
-## 联系方式
-
-QQ: 173887664
-
-QQ 交流群： 887905095
+## Contact
 
 Email: LemonQu@outlook.com
 
-将在之后逐渐开放 https://chat.lemonquapi.tk 的对话示例
+Will gradually open up the website: https://chat.lemonquapi.tk
