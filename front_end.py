@@ -56,6 +56,7 @@ async def chat_stream(prompt: str):
 		enable_markmap = pl_status['markmap']
 		enable_files = pl_status['files']
 		#enable_SD = pl_status['SD']
+        chat_prompt = prompt # This is a temp fix for sidebar questioning info.
 
 		if enable_weather:
 			log('Calling weather plugin', 'EVENT')
@@ -206,7 +207,7 @@ async def upload_file(file: UploadFile = File(...)):
 @app.get("/api/title")
 def title():
 	global chat_response, chat_prompt, history
-	request = chatglm_json(f"我的问题是：“{chat_prompt}”，请对我发送的内容进行概括，8个字以内，请直接回复概括内容，不需要回复其他内容", history)
+	request = chatglm_json(f"请对我的问题进行8个字以内的概括，请直接回复这个问题的关键词，不需要回答这个问题，不需要回复其他内容。我的问题是：“{chat_prompt}”", history)
 	request_list = json.loads(request)
 	title_text = str(request_list.get('response'))
 	title_text = title_text.strip().replace("概括内容","").replace("概括文字","").replace("概括","").replace("：","").replace(":","").removesuffix("。").removesuffix(".").removesuffix("，").removesuffix(",")
