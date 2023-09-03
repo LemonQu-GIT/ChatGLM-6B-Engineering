@@ -56,7 +56,7 @@ async def chat_stream(prompt: str):
 		enable_markmap = pl_status['markmap']
 		enable_files = pl_status['files']
 		#enable_SD = pl_status['SD']
-        chat_prompt = prompt # This is a temp fix for sidebar questioning info.
+		chat_prompt = prompt # This is a temp fix for sidebar questioning info.
 
 		if enable_weather:
 			log('Calling weather plugin', 'EVENT')

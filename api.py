@@ -3,10 +3,13 @@ from pydantic import BaseModel
 from typing import Optional
 from sse_starlette.sse import EventSourceResponse
 from transformers import AutoTokenizer, AutoModel
+from plugins.utils import *
 import uvicorn, json, torch, datetime
 
-DEVICE = "cuda"
-DEVICE_ID = "0"
+DEVICE = get_config()['basic']['device']
+DEVICE_ID = get_config()['basic']['device_id']
+model_name = get_config()['basic']['model']
+quantize = get_config()['basic']['quantize']
 CUDA_DEVICE = f"{DEVICE}:{DEVICE_ID}" if DEVICE_ID else DEVICE
 
 def torch_gc():
@@ -85,11 +88,11 @@ async def clear_memory():
 	return "200"
 
 if __name__ == '__main__':
-	#tokenizer = AutoTokenizer.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True)
-	#model = AutoModel.from_pretrained("THUDM/chatglm2-6b", trust_remote_code=True, device='cuda').quantize(4).half().cuda()
-	#tokenizer = AutoTokenizer.from_pretrained(r"E:\huggingface\models--THUDM--chatglm-6b\snapshots\a10da4c68b5d616030d3531fc37a13bb44ea814d", trust_remote_code=True)
-	#model = AutoModel.from_pretrained(r"E:\huggingface\models--THUDM--chatglm-6b\snapshots\a10da4c68b5d616030d3531fc37a13bb44ea814d", trust_remote_code=True).quantize(4).half().cuda()
-	tokenizer = AutoTokenizer.from_pretrained(r"E:\model\chatglm2-6b", trust_remote_code=True)
-	model = AutoModel.from_pretrained(r"E:\model\chatglm2-6b", trust_remote_code=True).quantize(4).half().cuda()
+	if DEVICE == "cuda":
+		tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+		model = AutoModel.from_pretrained(model_name, trust_remote_code=True, device='cuda').quantize(quantize).half().cuda()
+	else:
+		tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+		model = AutoModel.from_pretrained(model_name, trust_remote_code=True).quantize(quantize).half().float()
 	model.eval()
-	uvicorn.run(app, host='0.0.0.0', port=8000, workers=1)
+	uvicorn.run(app, host='0.0.0.0', port=get_config()['basic']['port'], workers=1)
