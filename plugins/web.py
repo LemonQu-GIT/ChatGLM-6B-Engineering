@@ -108,24 +108,24 @@ def redirect_url(url):
 	return real_url
 
 def search_web(keyword):
-	if str(get_config['web']['browser_name']).lower() == "chrome":
+	if str(get_config()['web']['browser_name']).lower() == "chrome":
 		options = webdriver.ChromeOptions()
 		options.add_argument('headless')
 		options.add_experimental_option('excludeSwitches', ['enable-logging'])
 		options.add_experimental_option('useAutomationExtension', False)
 		options.add_argument('lang=zh-CN,en-US,en')
 		driver = webdriver.Chrome(options=options)
-	elif str(get_config['web']['browser_name']).lower() == "edge":
+	elif str(get_config()['web']['browser_name']).lower() == "edge":
 		options = webdriver.EdgeOptions()
 		options.add_argument('headless')
 		options.add_experimental_option('excludeSwitches', ['enable-logging'])
 		driver = webdriver.Edge(options=options)
-	elif str(get_config['web']['browser_name']).lower() == "firefox":
+	elif str(get_config()['web']['browser_name']).lower() == "firefox":
 		options = webdriver.FirefoxOptions()
 		options.add_argument('headless')
 		options.add_experimental_option('excludeSwitches', ['enable-logging'])
 		driver = webdriver.Firefox(options=options)
-	elif str(get_config['web']['browser_name']).lower() == "ie":
+	elif str(get_config()['web']['browser_name']).lower() == "ie":
 		options = webdriver.IeOptions()
 		options.add_argument('headless')
 		options.add_experimental_option('excludeSwitches', ['enable-logging'])

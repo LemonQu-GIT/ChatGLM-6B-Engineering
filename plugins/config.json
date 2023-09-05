@@ -37,7 +37,7 @@
   "device": "cuda",
   "device_id": "0",
   "quantize": 4,
-  "model": "THUDM/chatglm2-6b",
+  "model": "E:\\model\\chatglm2-6b",
   "port": 8000,
   "host": "http://127.0.0.1"
  },
